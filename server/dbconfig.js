@@ -9,16 +9,19 @@ const config = {
   port: parseInt(process.env.DB_PORT) || 3306, // Default MySQL port is 3306
 };
 
-// Create a connection pool and connect to the database
-const poolPromise = mysql
-  .createPool(config)
-  .then((pool) => {
+// Create a connection pool
+const pool = mysql.createPool(config);
+
+// Test the connection
+pool
+  .getConnection()
+  .then((connection) => {
     console.log("Connected to MySQL");
-    return pool;
+    connection.release(); // Release the connection back to the pool
   })
   .catch((err) => {
     console.error("Database connection failed:", err);
     process.exit(1); // Exit the application if the connection fails
   });
 
-module.exports = { pool: poolPromise };
+module.exports = { pool };

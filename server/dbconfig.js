@@ -10,6 +10,7 @@ const config = {
   driver: "tedious",
   options: {
     trustServerCertificate: true,
+    connectionTimeout: 30000,
   },
 };
 

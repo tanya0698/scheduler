@@ -7,6 +7,7 @@ const config = {
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   port: parseInt(process.env.DB_PORT) || 3306, // Default MySQL port is 3306
+  connectTimeout: 30000,
 };
 
 // Create a connection pool

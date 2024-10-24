@@ -2,12 +2,15 @@ const mysql = require("mysql2/promise"); // Use promise-based API
 require("dotenv").config();
 
 const config = {
-  host: process.env.DB_SERVER, // Use 'host' instead of 'server'
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
+  server: process.env.DB_SERVER,
   database: process.env.DB_NAME,
   port: parseInt(process.env.DB_PORT) || 3306, // Default MySQL port is 3306
   connectTimeout: 30000,
+  options: {
+    trustServerCertificate: true,
+  },
 };
 
 // Create a connection pool

@@ -2,7 +2,6 @@ import { lazy } from 'react';
 const Home = lazy(() => import('../pages/Finance'));
 const Finance = lazy(() => import('../pages/Finance'));
 const Calendar = lazy(() => import('../pages/Apps/Calendar'));
-const CreateCalendar = lazy(() => import('../pages/Apps/create'));
 const Tabs = lazy(() => import('../pages/Components/Tabs'));
 const Accordians = lazy(() => import('../pages/Components/Accordians'));
 const Modals = lazy(() => import('../pages/Components/Modals'));
@@ -99,11 +98,6 @@ const routes = [
     {
         path: '/apps/calendar',
         element: <Calendar />,
-    },
-
-    {
-        path: '/apps/create-calender',
-        element: <CreateCalendar />,
     },
 
     // components page

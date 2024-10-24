@@ -27,7 +27,7 @@ const Export = () => {
     const [search, setSearch] = useState('');
     const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'id', direction: 'asc' });
 
-    const reverseDate = (dateString) => {
+    const reverseDate = (dateString: string | number | Date) => {
         const date = new Date(dateString);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
@@ -48,12 +48,12 @@ const Export = () => {
 
     const fetchAppointments = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/appointments');
+            const response = await axios.get('http://9993-41-173-36-105.ngrok-free.app/api/appointments');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
                 let rowData = response.data.data;
-                rowData = rowData.map((appointment) => ({
+                rowData = rowData.map((appointment: { appointmentFrom: string | number | Date; appointmentTo: string | number | Date }) => ({
                     ...appointment,
                     appointmentFrom: reverseDate(appointment.appointmentFrom),
                     appointmentTo: reverseDate(appointment.appointmentTo),
@@ -265,12 +265,12 @@ const Export = () => {
             .join(' ');
     };
 
-    const handleEdit = (row) => {
+    const handleEdit = (row: any) => {
         // Logic to view the appointment details
         console.log('Editing:', row);
     };
 
-    const handleDelete = (row) => {
+    const handleDelete = (row: any) => {
         // Logic to delete the appointment
         console.log('Deleting:', row);
         // You might want to show a confirmation dialog before deletion

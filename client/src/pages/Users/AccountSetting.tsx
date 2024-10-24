@@ -27,7 +27,7 @@ const AccountSetting = () => {
         }
 
         try {
-            const response = await axios.get(`http://localhost:4002/api/users/${currentEmail}`);
+            const response = await axios.get(`http://9993-41-173-36-105.ngrok-free.app/api/users/${currentEmail}`);
             if (response.data.success) {
                 const userData = response.data.data;
                 setUser({
@@ -53,15 +53,15 @@ const AccountSetting = () => {
         setTabs(name);
     };
 
-    const handleChange = (e) => {
+    const handleChange = (e: { target: { id: any; value: any } }) => {
         const { id, value } = e.target;
         setUser((prevData) => ({ ...prevData, [id]: value }));
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: { preventDefault: () => void }) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:4002/api/update_profile', userData);
+            await axios.post('http://9993-41-173-36-105.ngrok-free.app/api/update_profile', userData);
             alert('User  data updated successfully!');
         } catch (error) {
             console.error('Error updating user data:', error);

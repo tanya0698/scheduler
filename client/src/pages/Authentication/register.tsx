@@ -44,7 +44,7 @@ const RegisterCover = () => {
 
     const fetchRoles = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/roles');
+            const response = await axios.get('http://9993-41-173-36-105.ngrok-free.app/api/roles');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -61,11 +61,11 @@ const RegisterCover = () => {
         fetchRoles();
     }, []);
 
-    const submitForm = async (e) => {
+    const submitForm = async (e: { preventDefault: () => void }) => {
         e.preventDefault();
 
         try {
-            const response = await axios.post('http://localhost:4002/api/register', {
+            const response = await axios.post('http://9993-41-173-36-105.ngrok-free.app/api/register', {
                 fullname,
                 email,
                 roleId,

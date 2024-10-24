@@ -38,7 +38,7 @@ const Calendar = () => {
 
     const fetchEvents = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/events');
+            const response = await axios.get('http://9993-41-173-36-105.ngrok-free.app/api/events');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -57,7 +57,7 @@ const Calendar = () => {
 
     const fetchStatus = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/status');
+            const response = await axios.get('http://9993-41-173-36-105.ngrok-free.app/api/status');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -74,7 +74,7 @@ const Calendar = () => {
         fetchStatus();
     }, []);
 
-    const formatDate = (dateString) => {
+    const formatDate = (dateString: string | number | Date) => {
         const date = new Date(dateString);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
@@ -87,7 +87,7 @@ const Calendar = () => {
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
     };
 
-    const reverseDate = (dateString) => {
+    const reverseDate = (dateString: string | number | Date) => {
         const date = new Date(dateString);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
@@ -115,41 +115,43 @@ const Calendar = () => {
 
     const fetchEvents2 = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/appointments');
+            const response = await axios.get('http://9993-41-173-36-105.ngrok-free.app/api/appointments');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
                 // Map the fetched appointments to the required structure
-                const formattedEvents = response.data.data.map((appointment) => {
-                    // Determine the class based on the type
-                    let className = '';
-                    switch (appointment.eventId) {
-                        case 1:
-                            className = 'bg-success text-white'; // Bootstrap danger
-                            break;
-                        case 2:
-                            className = 'bg-primary text-white'; // Bootstrap success
-                            break;
-                        case 3:
-                            className = 'bg-info text-white'; // Bootstrap info
-                            break;
-                        case 4:
-                            className = 'bg-danger text-white'; // Bootstrap info
-                            break;
-                        default:
-                            className = 'bg-primary text-white'; // Default
-                    }
+                const formattedEvents = response.data.data.map(
+                    (appointment: { eventId: any; appointmentId: any; appointmentName: any; appointmentFrom: any; appointmentTo: any; appointmentDescription: any }) => {
+                        // Determine the class based on the type
+                        let className = '';
+                        switch (appointment.eventId) {
+                            case 1:
+                                className = 'bg-success text-white'; // Bootstrap danger
+                                break;
+                            case 2:
+                                className = 'bg-primary text-white'; // Bootstrap success
+                                break;
+                            case 3:
+                                className = 'bg-info text-white'; // Bootstrap info
+                                break;
+                            case 4:
+                                className = 'bg-danger text-white'; // Bootstrap info
+                                break;
+                            default:
+                                className = 'bg-primary text-white'; // Default
+                        }
 
-                    return {
-                        id: appointment.appointmentId,
-                        title: appointment.appointmentName,
-                        start: appointment.appointmentFrom,
-                        end: appointment.appointmentTo,
-                        classNames: [className], // Set the Bootstrap class names
-                        description: appointment.appointmentDescription,
-                        type: appointment.eventId,
-                    };
-                });
+                        return {
+                            id: appointment.appointmentId,
+                            title: appointment.appointmentName,
+                            start: appointment.appointmentFrom,
+                            end: appointment.appointmentTo,
+                            classNames: [className], // Set the Bootstrap class names
+                            description: appointment.appointmentDescription,
+                            type: appointment.eventId,
+                        };
+                    }
+                );
                 setEvents2(formattedEvents); // Set the formatted events
                 console.log('Fetched appointments:', formattedEvents);
             }
@@ -162,9 +164,9 @@ const Calendar = () => {
         fetchEvents2();
     }, []);
 
-    const fetchAppointmentDetails = async (appointmentId) => {
+    const fetchAppointmentDetails = async (appointmentId: string) => {
         try {
-            const response = await axios.get(`http://localhost:4002/api/appointments/${appointmentId}`);
+            const response = await axios.get(`http://9993-41-173-36-105.ngrok-free.app/api/appointments/${appointmentId}`);
             console.log('Appointment Details:', response.data);
 
             if (response.data.success) {
@@ -204,10 +206,10 @@ const Calendar = () => {
                 end: data.end,
             },
         };
-        fetchAppointmentDetails(obj);
+        // fetchAppointmentDetails(obj);
     };
 
-    const submitForm = async (e) => {
+    const submitForm = async (e: { preventDefault: () => void }) => {
         e.preventDefault();
 
         try {
@@ -223,7 +225,7 @@ const Calendar = () => {
                 statusId,
             });
 
-            const response = await axios.post('http://localhost:4002/api/create_appointment', {
+            const response = await axios.post('http://9993-41-173-36-105.ngrok-free.app/api/create_appointment', {
                 appointmentName,
                 appointmentLocation,
                 appointmentFrom: formattedFrom,
@@ -249,7 +251,7 @@ const Calendar = () => {
         }
     };
 
-    const updateForm = async (e) => {
+    const updateForm = async (e: { preventDefault: () => void }) => {
         e.preventDefault(); // Prevent the default form submission
         console.log('Updating appointment with ID:', selectedEvent.id);
         console.log('Selected Event Data:', selectedEvent);
@@ -267,7 +269,7 @@ const Calendar = () => {
 
         try {
             // Send the PUT request with the updated appointment details
-            const response = await axios.put(`http://localhost:4002/api/update_appointment/${selectedEvent.id}`, updatedAppointmentData);
+            const response = await axios.put(`http://9993-41-173-36-105.ngrok-free.app/api/update_appointment/${selectedEvent.id}`, updatedAppointmentData);
 
             if (response.data.success) {
                 console.log('Appointment updated successfully:', response.data.message);

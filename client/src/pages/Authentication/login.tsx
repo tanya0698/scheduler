@@ -40,13 +40,13 @@ const LoginCover = () => {
     };
     const [flag, setFlag] = useState(themeConfig.locale);
 
-    const submitForm = (e) => {
+    const submitForm = (e: { preventDefault: () => void }) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
         axios
-            .post('http://localhost:4002/api/login', {
+            .post('http://9993-41-173-36-105.ngrok-free.app/api/login', {
                 email,
                 password,
             })

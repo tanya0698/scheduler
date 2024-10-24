@@ -31,10 +31,10 @@ const RecoverIdCover = () => {
     };
     const [flag, setFlag] = useState(themeConfig.locale);
 
-    const submitForm = async (e) => {
+    const submitForm = async (e: { preventDefault: () => void }) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:4002/api/forgot_password', { email });
+            const response = await axios.post('http://9993-41-173-36-105.ngrok-free.app/api/forgot_password', { email });
             setSuccess('Email sent successfully!');
             setError('Email not found.');
         } catch (error) {

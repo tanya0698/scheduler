@@ -13,6 +13,7 @@ import IconFacebookCircle from '../../components/Icon/IconFacebookCircle';
 import IconTwitter from '../../components/Icon/IconTwitter';
 import IconGoogle from '../../components/Icon/IconGoogle';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const ChangeCover = () => {
     const dispatch = useDispatch();
@@ -55,13 +56,13 @@ const ChangeCover = () => {
         });
     };
 
-    const submitForm = (e) => {
+    const submitForm = (e: { preventDefault: () => void }) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
         axios
-            .post('http://localhost:4002/api/update_password', {
+            .post('http://9993-41-173-36-105.ngrok-free.app/api/update_password', {
                 password,
                 cpassword,
             })

@@ -21,7 +21,7 @@ const Tables = () => {
     const [currentDateTime, setCurrentDateTime] = useState<string>('');
     const [isFullscreen, setIsFullscreen] = useState(false);
 
-    const reverseDate = (dateString) => {
+    const reverseDate = (dateString: string | number | Date) => {
         const date = new Date(dateString);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
@@ -42,7 +42,7 @@ const Tables = () => {
 
     const fetchAppointments = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/appointments');
+            const response = await axios.get('http://9993-41-173-36-105.ngrok-free.app/api/appointments');
             console.log('Appointment Details:', response.data);
 
             if (response.data.success === true) {

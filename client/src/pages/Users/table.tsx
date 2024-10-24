@@ -45,7 +45,7 @@ const UsersTable = () => {
 
     const fetchRoles = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/roles');
+            const response = await axios.get('http://9993-41-173-36-105.ngrok-free.app/api/roles');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -64,7 +64,7 @@ const UsersTable = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/users');
+            const response = await axios.get('http://9993-41-173-36-105.ngrok-free.app/api/users');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -85,9 +85,9 @@ const UsersTable = () => {
         fetchUsers();
     }, []);
 
-    const fetchUserDetails = async (userId) => {
+    const fetchUserDetails = async (userId: any) => {
         try {
-            const response = await axios.get(`http://localhost:4002/api/users/${userId}`);
+            const response = await axios.get(`http://9993-41-173-36-105.ngrok-free.app/api/users/${userId}`);
             console.log('User Details:', response.data);
 
             if (response.data.success) {
@@ -283,22 +283,22 @@ const UsersTable = () => {
             .join(' ');
     };
 
-    const handleEdit = (row) => {
+    const handleEdit = (row: any) => {
         // Logic to view the appointment details
         console.log('Editing:', row);
     };
 
-    const handleDelete = async (userId) => {
+    const handleDelete = async (userId: any) => {
         if (confirm('Are you sure you want to delete this user?')) {
             try {
-                const response = await axios.delete(`http://localhost:4002/api/users/${userId}`);
+                const response = await axios.delete(`http://9993-41-173-36-105.ngrok-free.app/api/users/${userId}`);
                 console.log('Delete Response:', response.data);
 
                 if (response.data.success) {
                     // Optionally remove the user row from the table
                     const row = document.getElementById(`user-row-${userId}`);
                     if (row) {
-                        row.parentNode.removeChild(row);
+                        // row.parentNode.removeChild(row);
                     }
                     alert('User deleted successfully.');
                 } else {
@@ -311,7 +311,7 @@ const UsersTable = () => {
         }
     };
 
-    const formatDate = (dateString) => {
+    const formatDate = (dateString: string | number | Date) => {
         const date = new Date(dateString);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
@@ -324,7 +324,7 @@ const UsersTable = () => {
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
     };
 
-    const reverseDate = (dateString) => {
+    const reverseDate = (dateString: string | number | Date) => {
         const date = new Date(dateString);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
@@ -350,7 +350,7 @@ const UsersTable = () => {
         });
     };
 
-    const submitForm = async (e) => {
+    const submitForm = async (e: { preventDefault: () => void }) => {
         e.preventDefault();
 
         try {
@@ -362,7 +362,7 @@ const UsersTable = () => {
                 roleId,
             });
 
-            const response = await axios.post('http://localhost:4002/api/register', {
+            const response = await axios.post('http://9993-41-173-36-105.ngrok-free.app/api/register', {
                 fullname,
                 phone,
                 email,
@@ -386,7 +386,7 @@ const UsersTable = () => {
         }
     };
 
-    const updateForm = async (e) => {
+    const updateForm = async (e: { preventDefault: () => void }) => {
         e.preventDefault(); // Prevent the default form submission
         console.log('Updating user with ID:', selectedUser.id);
         console.log('Selected user Data:', selectedUser);
@@ -402,7 +402,7 @@ const UsersTable = () => {
 
         try {
             // Send the PUT request with the updated appointment details
-            const response = await axios.put(`http://localhost:4002/api/update_user/${selectedUser.id}`, updatedUserData);
+            const response = await axios.put(`http://9993-41-173-36-105.ngrok-free.app/api/update_user/${selectedUser.id}`, updatedUserData);
 
             if (response.data.success) {
                 console.log('User updated successfully:', response.data.message);
@@ -491,7 +491,7 @@ const UsersTable = () => {
                                             </li>
                                             <li>
                                                 <Tippy content="Delete">
-                                                    <button type="button" onClick={() => handleDelete(userId)}>
+                                                    <button type="button">
                                                         <IconTrashLines className="text-danger" />
                                                     </button>
                                                 </Tippy>

@@ -48,7 +48,7 @@ const Export = () => {
 
     const fetchAppointments = async () => {
         try {
-            const response = await axios.get('http://9993-41-173-36-105.ngrok-free.app/api/appointments');
+            const response = await axios.get('http://192.168.1.55:4002/api/appointments');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {

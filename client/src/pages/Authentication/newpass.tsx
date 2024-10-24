@@ -43,7 +43,7 @@ const UpdateCover = () => {
         const email = new URLSearchParams(window.location.search).get('email');
 
         try {
-            const response = await axios.post(`http://9993-41-173-36-105.ngrok-free.app/api/reset_password/${token}/${email}`, {
+            const response = await axios.post(`http://192.168.1.55:4002/api/reset_password/${token}/${email}`, {
                 password,
                 cpassword,
             });

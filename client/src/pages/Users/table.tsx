@@ -45,7 +45,7 @@ const UsersTable = () => {
 
     const fetchRoles = async () => {
         try {
-            const response = await axios.get('http://9993-41-173-36-105.ngrok-free.app/api/roles');
+            const response = await axios.get('http://192.168.1.55:4002/api/roles');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -64,7 +64,7 @@ const UsersTable = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get('http://9993-41-173-36-105.ngrok-free.app/api/users');
+            const response = await axios.get('http://192.168.1.55:4002/api/users');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -87,7 +87,7 @@ const UsersTable = () => {
 
     const fetchUserDetails = async (userId: any) => {
         try {
-            const response = await axios.get(`http://9993-41-173-36-105.ngrok-free.app/api/users/${userId}`);
+            const response = await axios.get(`http://192.168.1.55:4002/api/users/${userId}`);
             console.log('User Details:', response.data);
 
             if (response.data.success) {
@@ -291,7 +291,7 @@ const UsersTable = () => {
     const handleDelete = async (userId: any) => {
         if (confirm('Are you sure you want to delete this user?')) {
             try {
-                const response = await axios.delete(`http://9993-41-173-36-105.ngrok-free.app/api/users/${userId}`);
+                const response = await axios.delete(`http://192.168.1.55:4002/api/users/${userId}`);
                 console.log('Delete Response:', response.data);
 
                 if (response.data.success) {
@@ -362,7 +362,7 @@ const UsersTable = () => {
                 roleId,
             });
 
-            const response = await axios.post('http://9993-41-173-36-105.ngrok-free.app/api/register', {
+            const response = await axios.post('http://192.168.1.55:4002/api/register', {
                 fullname,
                 phone,
                 email,
@@ -402,7 +402,7 @@ const UsersTable = () => {
 
         try {
             // Send the PUT request with the updated appointment details
-            const response = await axios.put(`http://9993-41-173-36-105.ngrok-free.app/api/update_user/${selectedUser.id}`, updatedUserData);
+            const response = await axios.put(`http://192.168.1.55:4002/api/update_user/${selectedUser.id}`, updatedUserData);
 
             if (response.data.success) {
                 console.log('User updated successfully:', response.data.message);

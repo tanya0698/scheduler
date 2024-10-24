@@ -46,7 +46,7 @@ const LoginCover = () => {
         setError('');
 
         axios
-            .post('http://9993-41-173-36-105.ngrok-free.app/api/login', {
+            .post('http://192.168.1.55:4002/api/login', {
                 email,
                 password,
             })

@@ -62,7 +62,7 @@ const ChangeCover = () => {
         setError('');
 
         axios
-            .post('http://9993-41-173-36-105.ngrok-free.app/api/update_password', {
+            .post('http://192.168.1.55:4002/api/update_password', {
                 password,
                 cpassword,
             })

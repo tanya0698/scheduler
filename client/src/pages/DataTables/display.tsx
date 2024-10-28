@@ -42,19 +42,19 @@ const Tables = () => {
 
     const fetchAppointments = async () => {
         try {
-            const response = await axios.get('http://192.168.1.55:4002/api/appointments');
-            console.log('Appointment Details:', response.data);
+            const response = await axios.get('http://localhost:4002/api/current');
+            console.log('Current Appointment Details:', response.data);
 
             if (response.data.success === true) {
                 const rowData = response.data.data; // Adjust according to the actual structure
                 setInitialRecords(rowData);
                 setRecordsData(rowData);
-                console.log('Fetched appointments:', rowData);
+                console.log('Fetched current appointments:', rowData);
             } else {
-                console.error('Failed to fetch appointments:', response.data.message);
+                console.error('Failed to fetch current appointments:', response.data.message);
             }
         } catch (error) {
-            console.error('Error fetching appointments', error);
+            console.error('Error fetching current appointments', error);
             setInitialRecords([]); // Reset initialRecords on error
         }
     };
@@ -117,19 +117,21 @@ const Tables = () => {
                                 <tbody>
                                     {recordsData.map((data) => {
                                         return (
-                                            <tr>
+                                            <tr key={data.appointmentId}>
+                                                {' '}
+                                                {/* Add a unique key here */}
                                                 <td>{data.appointmentId}</td>
                                                 <td>
                                                     <div className="whitespace-nowrap">{data.appointmentName}</div>
                                                 </td>
                                                 <td>{data.appointmentLocation}</td>
-                                                <td>{reverseDate(data.appointmentFrom)}</td> {/* Format appointmentFrom */}
+                                                <td>{reverseDate(data.appointmentFrom)}</td>
                                                 <td>{reverseDate(data.appointmentTo)}</td>
                                                 <td>
                                                     <span
                                                         className={`badge whitespace-nowrap ${
                                                             data.event === 'Personal'
-                                                                ? 'badge badge-outline-primary   '
+                                                                ? 'badge badge-outline-primary'
                                                                 : data.event === 'Work'
                                                                 ? 'badge badge-outline-warning'
                                                                 : data.event === 'Travel'
@@ -146,7 +148,7 @@ const Tables = () => {
                                                     <span
                                                         className={`badge whitespace-nowrap ${
                                                             data.status === 'Completed'
-                                                                ? 'badge badge-outline-primary   '
+                                                                ? 'badge badge-outline-primary'
                                                                 : data.status === 'Pending'
                                                                 ? 'badge badge-outline-success'
                                                                 : data.status === 'Rescheduled'

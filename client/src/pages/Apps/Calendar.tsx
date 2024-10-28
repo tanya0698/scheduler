@@ -38,7 +38,7 @@ const Calendar = () => {
 
     const fetchEvents = async () => {
         try {
-            const response = await axios.get('http://192.168.1.55:4002/api/events');
+            const response = await axios.get('http://localhost:4002/api/events');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -57,7 +57,7 @@ const Calendar = () => {
 
     const fetchStatus = async () => {
         try {
-            const response = await axios.get('http://192.168.1.55:4002/api/status');
+            const response = await axios.get('http://localhost:4002/api/status');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -115,7 +115,7 @@ const Calendar = () => {
 
     const fetchEvents2 = async () => {
         try {
-            const response = await axios.get('http://192.168.1.55:4002/api/appointments');
+            const response = await axios.get('http://localhost:4002/api/appointments');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -166,7 +166,7 @@ const Calendar = () => {
 
     const fetchAppointmentDetails = async (appointmentId: string) => {
         try {
-            const response = await axios.get(`http://192.168.1.55:4002/api/appointments/${appointmentId}`);
+            const response = await axios.get(`http://localhost:4002/api/appointments/${appointmentId}`);
             console.log('Appointment Details:', response.data);
 
             if (response.data.success) {
@@ -225,7 +225,7 @@ const Calendar = () => {
                 statusId,
             });
 
-            const response = await axios.post('http://192.168.1.55:4002/api/create_appointment', {
+            const response = await axios.post('http://localhost:4002/api/create_appointment', {
                 appointmentName,
                 appointmentLocation,
                 appointmentFrom: formattedFrom,
@@ -269,7 +269,7 @@ const Calendar = () => {
 
         try {
             // Send the PUT request with the updated appointment details
-            const response = await axios.put(`http://192.168.1.55:4002/api/update_appointment/${selectedEvent.id}`, updatedAppointmentData);
+            const response = await axios.put(`http://localhost:4002/api/update_appointment/${selectedEvent.id}`, updatedAppointmentData);
 
             if (response.data.success) {
                 console.log('Appointment updated successfully:', response.data.message);

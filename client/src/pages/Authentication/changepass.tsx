@@ -62,7 +62,7 @@ const ChangeCover = () => {
         setError('');
 
         axios
-            .post('http://192.168.1.55:4002/api/update_password', {
+            .post('http://localhost:4002/api/update_password', {
                 password,
                 cpassword,
             })

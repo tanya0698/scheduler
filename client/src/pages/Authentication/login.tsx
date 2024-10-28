@@ -46,33 +46,38 @@ const LoginCover = () => {
         setError('');
 
         axios
-            .post('http://192.168.1.55:4002/api/login', {
+            .post('http://localhost:4002/api/login', {
                 email,
                 password,
             })
             .then((res) => {
-                const { success, token } = res.data; // Destructure success and token
+                const { success, token, roleId } = res.data;
+
                 setLoading(false);
-                console.log('Response:', res.data); // Log the entire response
+                console.log('Response:', res.data);
 
                 if (!success) {
                     setError('Incorrect Email or Password');
                     setResponseMessage('');
                 } else {
-                    setResponseMessage(token);
                     localStorage.setItem('email', email);
                     localStorage.setItem('token', token);
-
+                    localStorage.setItem('roleId', roleId);
                     const isAuthenticated = true;
-                    navigate('/apps/calendar', { state: { isAuthenticated } });
-                    console.log('Navigating with token:', token);
+
+                    console.log('Navigating to the appropriate page based on role:', roleId);
+                    if (roleId === 1) {
+                        navigate('/', { state: { isAuthenticated } });
+                    } else if (roleId === 2) {
+                        navigate('/users/user-table', { state: { isAuthenticated } });
+                    }
                 }
             })
             .catch((error) => {
                 setLoading(false);
                 setError('An error occurred. Please try again.');
                 setResponseMessage('');
-                console.error('Error:', error); // Log the error for debugging
+                console.error('Error:', error);
             });
     };
 

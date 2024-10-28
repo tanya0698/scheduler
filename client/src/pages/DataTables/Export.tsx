@@ -1,5 +1,6 @@
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
 import sortBy from 'lodash/sortBy';
 import { downloadExcel } from 'react-export-table-to-excel';
 import { useDispatch } from 'react-redux';
@@ -9,9 +10,12 @@ import IconPrinter from '../../components/Icon/IconPrinter';
 import IconTrashLines from '../../components/Icon/IconTrashLines';
 import IconPencil from '../../components/Icon/IconPencil';
 import IconSettings from '../../components/Icon/IconSettings';
-import { Link } from 'react-router-dom';
+import IconPlus from '../../components/Icon/IconPlus';
+import IconX from '../../components/Icon/IconX';
+import { Link, useNavigate } from 'react-router-dom';
 import Tippy from '@tippyjs/react';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const Export = () => {
     const dispatch = useDispatch();
@@ -26,6 +30,23 @@ const Export = () => {
 
     const [search, setSearch] = useState('');
     const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'id', direction: 'asc' });
+
+    const [appointmentName, setAppointmentName] = useState('');
+    const [appointmentLocation, setAppointmentLocation] = useState('');
+    const [events, setEvents] = useState<{ eventId: number; eventName: string }[]>([]);
+    const [eventId, setEventId] = useState<number | ''>('');
+    const [status, setStatus] = useState<{ statusId: number; statusName: string }[]>([]);
+    const [statusId, setStatusId] = useState<number | ''>('');
+    const [appointmentDescription, setAppointmentDescription] = useState('');
+    const [appointmentFrom, setAppointmentFrom] = useState('');
+    const [appointmentTo, setAppointmentTo] = useState('');
+    const [error, setError] = useState('');
+    const [registrationSuccess, setRegistrationSuccess] = useState(false);
+    const navigate = useNavigate();
+    const [modal1, setModal1] = useState(false);
+    const [events2, setEvents2] = useState<any[]>([]); // Initialize with an empty array
+    const [selectedEvent, setSelectedEvent] = useState<any>(null);
+    const [modalEdit, setModalEdit] = useState(false);
 
     const reverseDate = (dateString: string | number | Date) => {
         const date = new Date(dateString);
@@ -46,9 +67,22 @@ const Export = () => {
         );
     };
 
+    const formatDate = (dateString: string | number | Date) => {
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
+
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+    };
+
     const fetchAppointments = async () => {
         try {
-            const response = await axios.get('http://192.168.1.55:4002/api/appointments');
+            const response = await axios.get('http://localhost:4002/api/appointments');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -73,6 +107,44 @@ const Export = () => {
 
     useEffect(() => {
         fetchAppointments();
+    }, []);
+
+    const fetchEvents = async () => {
+        try {
+            const response = await axios.get('http://localhost:4002/api/events');
+            console.log('API Response:', response.data);
+
+            if (response.data.success === true) {
+                // Check for success
+                setEvents(response.data.data);
+                console.log('Fetched types:', response.data.data);
+            }
+        } catch (error) {
+            console.error('Error fetching types', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchEvents();
+    }, []);
+
+    const fetchStatus = async () => {
+        try {
+            const response = await axios.get('http://localhost:4002/api/status');
+            console.log('API Response:', response.data);
+
+            if (response.data.success === true) {
+                // Check for success
+                setStatus(response.data.data);
+                console.log('Fetched status:', response.data.data);
+            }
+        } catch (error) {
+            console.error('Error fetching status', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchStatus();
     }, []);
 
     const col = ['Number', 'Name', 'Location', 'From', 'To', 'Type', 'Status'];
@@ -116,164 +188,168 @@ const Export = () => {
 
     const header = ['Number', 'Name', 'Location', 'From', 'To', 'Type', 'Status'];
 
-    const formatDate = (date: any) => {
-        if (date) {
-            const dt = new Date(date);
-            const month = dt.getMonth() + 1 < 10 ? '0' + (dt.getMonth() + 1) : dt.getMonth() + 1;
-            const day = dt.getDate() < 10 ? '0' + dt.getDate() : dt.getDate();
-            return day + '/' + month + '/' + dt.getFullYear();
-        }
-        return '';
-    };
-
-    const handleDownloadExcel = () => {
-        downloadExcel({
-            fileName: 'appointments.xlsx',
-            sheet: 'Appointments',
-            tablePayload: {
-                header: ['Number', 'Name', 'Location', 'From', 'To', 'Type', 'Status'],
-                body: initialRecords.map((record) => [
-                    record.appointmentId,
-                    record.appointmentName,
-                    record.appointmentLocation,
-                    record.appointmentFrom,
-                    record.appointmentTo,
-                    record.event,
-                    record.status,
-                ]),
-            },
+    const showMessage = (msg = '', type = 'success') => {
+        const toast: any = Swal.mixin({
+            toast: true,
+            position: 'top',
+            showConfirmButton: false,
+            timer: 3000,
+            customClass: { container: 'toast' },
+        });
+        toast.fire({
+            icon: type,
+            title: msg,
+            padding: '10px 20px',
         });
     };
 
-    const exportTable = (type: any) => {
-        let columns: any = col;
-        let records = initialRecords;
-        let filename = 'table';
+    const submitForm = async (e: { preventDefault: () => void }) => {
+        e.preventDefault();
 
-        let newVariable: any;
-        newVariable = window.navigator;
-
-        if (type === 'csv') {
-            let coldelimiter = ';';
-            let linedelimiter = '\n';
-            let result = columns
-                .map((d: any) => {
-                    return capitalize(d);
-                })
-                .join(coldelimiter);
-            result += linedelimiter;
-            // eslint-disable-next-line array-callback-return
-            records.map((item: any) => {
-                // eslint-disable-next-line array-callback-return
-                columns.map((d: any, index: any) => {
-                    if (index > 0) {
-                        result += coldelimiter;
-                    }
-                    let val = item[d] ? item[d] : '';
-                    result += val;
-                });
-                result += linedelimiter;
+        try {
+            const formattedFrom = formatDate(appointmentFrom);
+            const formattedTo = formatDate(appointmentTo);
+            console.log({
+                appointmentName,
+                appointmentDescription,
+                appointmentLocation,
+                appointmentFrom,
+                appointmentTo,
+                eventId,
+                statusId,
             });
 
-            if (result == null) return;
-            if (!result.match(/^data:text\/csv/i) && !newVariable.msSaveOrOpenBlob) {
-                var data = 'data:application/csv;charset=utf-8,' + encodeURIComponent(result);
-                var link = document.createElement('a');
-                link.setAttribute('href', data);
-                link.setAttribute('download', filename + '.csv');
-                link.click();
+            const response = await axios.post('http://localhost:4002/api/create_appointment', {
+                appointmentName,
+                appointmentLocation,
+                appointmentFrom: formattedFrom,
+                appointmentTo: formattedTo,
+                appointmentDescription,
+                eventId,
+                statusId,
+            });
+
+            console.log(response.data); // Log the response
+
+            if (response.data.success) {
+                showMessage('Appointment has been created successfully.');
+                setModal1(false);
+                navigate('/apps/calendar');
             } else {
-                var blob = new Blob([result]);
-                if (newVariable.msSaveOrOpenBlob) {
-                    newVariable.msSaveBlob(blob, filename + '.csv');
-                }
+                showMessage('Failed to update appointment:', response.data.message);
+                setError(response.data.error || 'An error occurred');
             }
-        } else if (type === 'print') {
-            var rowhtml = '<p>' + filename + '</p>';
-            rowhtml +=
-                '<table style="width: 100%; " cellpadding="0" cellcpacing="0"><thead><tr style="color: #515365; background: #eff5ff; -webkit-print-color-adjust: exact; print-color-adjust: exact; "> ';
-            // eslint-disable-next-line array-callback-return
-            columns.map((d: any) => {
-                rowhtml += '<th>' + capitalize(d) + '</th>';
-            });
-            rowhtml += '</tr></thead>';
-            rowhtml += '<tbody>';
-
-            // eslint-disable-next-line array-callback-return
-            records.map((item: any) => {
-                rowhtml += '<tr>';
-                // eslint-disable-next-line array-callback-return
-                columns.map((d: any) => {
-                    let val = item[d] ? item[d] : '';
-                    rowhtml += '<td>' + val + '</td>';
-                });
-                rowhtml += '</tr>';
-            });
-            rowhtml +=
-                '<style>body {font-family:Arial; color:#495057;}p{text-align:center;font-size:18px;font-weight:bold;margin:15px;}table{ border-collapse: collapse; border-spacing: 0; }th,td{font-size:12px;text-align:left;padding: 4px;}th{padding:8px 4px;}tr:nth-child(2n-1){background:#f7f7f7; }</style>';
-            rowhtml += '</tbody></table>';
-            var winPrint: any = window.open('', '', 'left=0,top=0,width=1000,height=600,toolbar=0,scrollbars=0,status=0');
-            winPrint.document.write('<title>Print</title>' + rowhtml);
-            winPrint.document.close();
-            winPrint.focus();
-            winPrint.print();
-        } else if (type === 'txt') {
-            let coldelimiter = ',';
-            let linedelimiter = '\n';
-            let result = columns
-                .map((d: any) => {
-                    return capitalize(d);
-                })
-                .join(coldelimiter);
-            result += linedelimiter;
-            // eslint-disable-next-line array-callback-return
-            records.map((item: any) => {
-                // eslint-disable-next-line array-callback-return
-                columns.map((d: any, index: any) => {
-                    if (index > 0) {
-                        result += coldelimiter;
-                    }
-                    let val = item[d] ? item[d] : '';
-                    result += val;
-                });
-                result += linedelimiter;
-            });
-
-            if (result == null) return;
-            if (!result.match(/^data:text\/txt/i) && !newVariable.msSaveOrOpenBlob) {
-                var data1 = 'data:application/txt;charset=utf-8,' + encodeURIComponent(result);
-                var link1 = document.createElement('a');
-                link1.setAttribute('href', data1);
-                link1.setAttribute('download', filename + '.txt');
-                link1.click();
-            } else {
-                var blob1 = new Blob([result]);
-                if (newVariable.msSaveOrOpenBlob) {
-                    newVariable.msSaveBlob(blob1, filename + '.txt');
-                }
-            }
+        } catch (error) {
+            console.error(error); // Log the error for debugging
+            setError('An error occurred. Please try again later.');
         }
     };
 
-    const capitalize = (text: any) => {
-        return text
-            .replace('_', ' ')
-            .replace('-', ' ')
-            .toLowerCase()
-            .split(' ')
-            .map((s: any) => s.charAt(0).toUpperCase() + s.substring(1))
-            .join(' ');
+    const updateForm = async (e: { preventDefault: () => void }) => {
+        e.preventDefault(); // Prevent the default form submission
+        console.log('Updating appointment with ID:', selectedEvent.id);
+        console.log('Selected Event Data:', selectedEvent);
+
+        // Prepare the updated appointment data
+        const updatedAppointmentData = {
+            appointmentName: selectedEvent.title, // Ensure this matches your data structure
+            appointmentDescription: selectedEvent.description,
+            appointmentLocation: selectedEvent.location,
+            appointmentFrom: formatDate(selectedEvent.start),
+            appointmentTo: formatDate(selectedEvent.end),
+            eventId: selectedEvent.type, // Change this to match the expected field name
+            statusId: selectedEvent.className, // Change this to match the expected field name
+        };
+
+        try {
+            // Send the PUT request with the updated appointment details
+            const response = await axios.put(`http://localhost:4002/api/update_appointment/${selectedEvent.id}`, updatedAppointmentData);
+
+            if (response.data.success) {
+                console.log('Appointment updated successfully:', response.data.message);
+                // Optionally, you can close the modal or reset the form here
+                showMessage('Appointment has been updated successfully.');
+                setModalEdit(false);
+                // You may also want to refetch the appointment details or update the state
+            } else {
+                showMessage('Failed to update appointment:', response.data.message);
+                console.error('Failed to update appointment:', response.data.message);
+                // You can display an error message to the user here
+            }
+        } catch (error) {
+            console.error('Error updating appointment:', error);
+            // Handle the error, e.g., show a notification to the user
+        }
     };
 
-    const handleEdit = (row: any) => {
-        // Logic to view the appointment details
-        console.log('Editing:', row);
+    const fetchAppointmentDetails = async (appointmentId: string) => {
+        try {
+            const response = await axios.get(`http://localhost:4002/api/appointments/${appointmentId}`);
+            console.log('Appointment Details:', response.data);
+
+            if (response.data.success) {
+                const appointment = response.data.data; // This is a single appointment object
+
+                console.log('Appointment Event:', appointment.event);
+                console.log('Appointment Status:', appointment.status);
+                console.log('Events Array:', events);
+                console.log('Status Array:', status);
+
+                // Find the event and status objects as before
+                const eventObj = events.find((event) => event.eventName === appointment.event);
+                const statusObj = status.find((stat) => stat.statusName === appointment.status);
+
+                // Format the appointment object
+                const formattedEvent = {
+                    id: appointment.appointmentId,
+                    title: appointment.appointmentName,
+                    start: formatDate(appointment.appointmentFrom),
+                    end: formatDate(appointment.appointmentTo),
+                    className: statusObj ? statusObj.statusId : null,
+                    description: appointment.appointmentDescription,
+                    type: eventObj ? eventObj.eventId : null,
+                    location: appointment.appointmentLocation,
+                };
+
+                // Set the selected event to the formatted event object
+                setSelectedEvent(formattedEvent);
+                console.log('Fetched appointment to be updated:', formattedEvent);
+            } else {
+                console.error('Failed to fetch appointment details:', response.data.message);
+            }
+        } catch (error) {
+            console.error('Error fetching appointment details:', error);
+        }
     };
 
-    const handleDelete = (row: any) => {
-        // Logic to delete the appointment
-        console.log('Deleting:', row);
-        // You might want to show a confirmation dialog before deletion
+    const handleEdit = async (appointmentId: string) => {
+        await fetchAppointmentDetails(appointmentId); // Fetch appointment details
+        setModalEdit(true); // Show the modal
+    };
+
+    const deleteAppointment = async (appointmentId: string) => {
+        try {
+            const response = await axios.delete(`http://localhost:4002/api/appointments/${appointmentId}`);
+            console.log('Delete Response:', response.data);
+
+            if (response.data.success) {
+                showMessage('Appointment has been deleted successfully.');
+                console.log('Appointment deleted successfully:', response.data.message);
+            } else {
+                showMessage('Failed to delete appointment. Please try again!');
+                console.error('Failed to delete appointment:', response.data.message);
+            }
+        } catch (error) {
+            console.error('Error deleting appointment:', error);
+        }
+    };
+
+    // Example usage of deleteAppointment function
+    const handleDelete = async (appointmentId: string) => {
+        const confirmDelete = window.confirm('Are you sure you want to delete this appointment?');
+        if (confirmDelete) {
+            await deleteAppointment(appointmentId);
+        }
     };
 
     return (
@@ -291,14 +367,9 @@ const Export = () => {
             <div className="panel mt-6">
                 <div className="flex md:items-center justify-between md:flex-row flex-col mb-4.5 gap-5">
                     <div className="flex items-center flex-wrap">
-                        <button type="button" className="btn btn-primary btn-sm m-1" onClick={handleDownloadExcel}>
-                            <IconFile className="w-5 h-5 ltr:mr-2 rtl:ml-2" />
-                            EXCEL
-                        </button>
-
-                        <button type="button" onClick={() => exportTable('print')} className="btn btn-primary btn-sm m-1">
-                            <IconPrinter className="ltr:mr-2 rtl:ml-2" />
-                            PRINT
+                        <button type="button" className="btn btn-primary" onClick={() => setModal1(true)}>
+                            <IconPlus className="ltr:mr-2 rtl:ml-2" />
+                            Create Appointment
                         </button>
                     </div>
 
@@ -326,14 +397,14 @@ const Export = () => {
                                         <ul className="flex items-center justify-center gap-2">
                                             <li>
                                                 <Tippy content="Edit">
-                                                    <button type="button" onClick={() => handleEdit(row)}>
+                                                    <button type="button" onClick={() => handleEdit(row.appointmentId)}>
                                                         <IconPencil className="text-success" />
                                                     </button>
                                                 </Tippy>
                                             </li>
                                             <li>
                                                 <Tippy content="Delete">
-                                                    <button type="button" onClick={() => handleDelete(row)}>
+                                                    <button type="button" onClick={() => handleDelete(row.appointmentId)}>
                                                         <IconTrashLines className="text-danger" />
                                                     </button>
                                                 </Tippy>
@@ -356,6 +427,359 @@ const Export = () => {
                     />
                 </div>
             </div>
+            <Transition appear show={modal1} as={Fragment}>
+                <Dialog as="div" onClose={() => setModal1(false)} open={modal1} className="relative z-[51]">
+                    <Transition.Child
+                        as={Fragment}
+                        enter="duration-300 ease-out"
+                        enter-from="opacity-0"
+                        enter-to="opacity-100"
+                        leave="duration-200 ease-in"
+                        leave-from="opacity-100"
+                        leave-to="opacity-0"
+                    >
+                        <Dialog.Overlay className="fixed inset-0 bg-[black]/60" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center px-4 py-8">
+                            <Transition.Child
+                                as={Fragment}
+                                enter="duration-300 ease-out"
+                                enter-from="opacity-0 scale-95"
+                                enter-to="opacity-100 scale-100"
+                                leave="duration-200 ease-in"
+                                leave-from="opacity-100 scale-100"
+                                leave-to="opacity-0 scale-95"
+                            >
+                                <Dialog.Panel className="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg text-black dark:text-white-dark">
+                                    <button
+                                        type="button"
+                                        className="absolute top-4 ltr:right-4 rtl:left-4 text-gray-400 hover:text-gray-800 dark:hover:text-gray-600 outline-none"
+                                        onClick={() => setModal1(false)}
+                                    >
+                                        <IconX />
+                                    </button>
+                                    <div className="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">Add Appointment</div>
+                                    <div className="p-5">
+                                        <form className="space-y-5" onSubmit={submitForm}>
+                                            <div>
+                                                <label htmlFor="title">Appointment Name :</label>
+                                                <input
+                                                    id="title"
+                                                    type="text"
+                                                    name="title"
+                                                    className="form-input"
+                                                    placeholder="Enter Appointment Name"
+                                                    required
+                                                    value={appointmentName}
+                                                    onChange={(e) => setAppointmentName(e.target.value)}
+                                                />
+                                                <div className="text-danger mt-2" id="titleErr"></div>
+                                            </div>
+
+                                            <div>
+                                                <label htmlFor="location">Appointment Location :</label>
+                                                <input
+                                                    id="location"
+                                                    type="text"
+                                                    name="location"
+                                                    className="form-input"
+                                                    placeholder="Enter Appointment Location"
+                                                    required
+                                                    value={appointmentLocation}
+                                                    onChange={(e) => setAppointmentLocation(e.target.value)}
+                                                />
+                                                <div className="text-danger mt-2" id="locationErr"></div>
+                                            </div>
+
+                                            <div>
+                                                <label htmlFor="dateStart">From :</label>
+                                                <input
+                                                    id="start"
+                                                    type="datetime-local"
+                                                    name="start"
+                                                    className="form-input"
+                                                    placeholder="Appointment Start Date"
+                                                    required
+                                                    value={appointmentFrom}
+                                                    onChange={(e) => setAppointmentFrom(e.target.value)}
+                                                />
+                                                <div className="text-danger mt-2" id="startDateErr"></div>
+                                            </div>
+                                            <div>
+                                                <label htmlFor="dateEnd">To :</label>
+                                                <input
+                                                    id="end"
+                                                    type="datetime-local"
+                                                    name="end"
+                                                    className="form-input"
+                                                    placeholder="Appointment End Date"
+                                                    required
+                                                    value={appointmentTo}
+                                                    onChange={(e) => setAppointmentTo(e.target.value)}
+                                                />
+                                                <div className="text-danger mt-2" id="endDateErr"></div>
+                                            </div>
+                                            <div>
+                                                <label htmlFor="description">Appointment Description :</label>
+                                                <textarea
+                                                    id="description"
+                                                    name="description"
+                                                    className="form-textarea min-h-[130px]"
+                                                    placeholder="Enter Appointment Description"
+                                                    value={appointmentDescription}
+                                                    onChange={(e) => setAppointmentDescription(e.target.value)}
+                                                ></textarea>
+                                            </div>
+                                            <div>
+                                                <label>Select Appointment Type:</label>
+                                                <div className="mt-3">
+                                                    {events.length > 0 ? (
+                                                        events.map((event) => (
+                                                            <label
+                                                                key={event.eventId}
+                                                                className={`inline-flex cursor-pointer ltr:mr-3 rtl:ml-3 ${event.eventId === eventId ? 'bg-primary-500 text-info' : 'bg-success-200'}`}
+                                                            >
+                                                                <input
+                                                                    type="radio"
+                                                                    className="form-radio"
+                                                                    name="eventType"
+                                                                    value={event.eventId}
+                                                                    checked={eventId === event.eventId}
+                                                                    onChange={(e) => setEventId(Number(e.target.value))}
+                                                                />
+                                                                <span className="ltr:pl-2 rtl:pr-2">{event.eventName}</span>
+                                                            </label>
+                                                        ))
+                                                    ) : (
+                                                        <span>No types available</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label htmlFor="Status">Select Appointment Status</label>
+                                                <div className="relative text-white-dark">
+                                                    <select
+                                                        id="Status"
+                                                        className="form-input ps-10 placeholder:text-white-dark"
+                                                        value={statusId}
+                                                        onChange={(e) => setStatusId(Number(e.target.value))} // Convert value to number
+                                                    >
+                                                        <option value="" disabled>
+                                                            Select Status
+                                                        </option>
+                                                        {status.length > 0 ? (
+                                                            status.map((stat) => (
+                                                                <option key={stat.statusId} value={stat.statusId}>
+                                                                    {stat.statusName}
+                                                                </option>
+                                                            ))
+                                                        ) : (
+                                                            <option value="" disabled>
+                                                                No status available
+                                                            </option>
+                                                        )}
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex justify-end items-center !mt-8">
+                                                <button type="button" className="btn btn-outline-danger" onClick={() => setModal1(false)}>
+                                                    Cancel
+                                                </button>
+                                                <button type="submit" className="btn btn-primary ltr:ml-4 rtl:mr-4">
+                                                    Create Appointment
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
+            <Transition appear show={modalEdit} as={Fragment}>
+                <Dialog as="div" onClose={() => setModalEdit(false)} open={modalEdit} className="relative z-[51]">
+                    {/* Modal Overlay */}
+                    <Transition.Child
+                        as={Fragment}
+                        enter="duration-300 ease-out"
+                        enter-from="opacity-0"
+                        enter-to="opacity-100"
+                        leave="duration-200 ease-in"
+                        leave-from="opacity-100"
+                        leave-to="opacity-0"
+                    >
+                        <Dialog.Overlay className="fixed inset-0 bg-[black]/60" />
+                    </Transition.Child>
+
+                    {/* Modal Content */}
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center px-4 py-8">
+                            <Transition.Child
+                                as={Fragment}
+                                enter="duration-300 ease-out"
+                                enter-from="opacity-0 scale-95"
+                                enter-to="opacity-100 scale-100"
+                                leave="duration-200 ease-in"
+                                leave-from="opacity-100 scale-100"
+                                leave-to="opacity-0 scale-95"
+                            >
+                                <Dialog.Panel className="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg text-black dark:text-white-dark">
+                                    <button
+                                        type="button"
+                                        className="absolute top-4 ltr:right-4 rtl:left-4 text-gray-400 hover:text-gray-800 dark:hover:text-gray-600 outline-none"
+                                        onClick={() => setModalEdit(false)}
+                                    >
+                                        <IconX />
+                                    </button>
+                                    <div className="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">Edit Appointment</div>
+                                    <div className="p-5">
+                                        <form className="space-y-5" onSubmit={updateForm}>
+                                            <div>
+                                                <label htmlFor="title">Appointment Name :</label>
+                                                <input
+                                                    id="title"
+                                                    type="text"
+                                                    name="title"
+                                                    className="form-input"
+                                                    placeholder="Enter Appointment Name"
+                                                    required
+                                                    value={selectedEvent?.title || ''} // Use selectedEvent title
+                                                    onChange={(e) => setSelectedEvent({ ...selectedEvent, title: e.target.value })}
+                                                />
+                                                <div className="text-danger mt-2" id="titleErr"></div>
+                                            </div>
+
+                                            <div>
+                                                <label htmlFor="location">Appointment Location :</label>
+                                                <input
+                                                    id="location"
+                                                    type="text"
+                                                    name="location"
+                                                    className="form-input"
+                                                    placeholder="Enter Appointment Location"
+                                                    required
+                                                    value={selectedEvent?.location || ''} // Use selectedEvent location
+                                                    onChange={(e) => setSelectedEvent({ ...selectedEvent, location: e.target.value })}
+                                                />
+                                                <div className="text-danger mt-2" id="locationErr"></div>
+                                            </div>
+
+                                            <div>
+                                                <label htmlFor="dateStart">From :</label>
+                                                <input
+                                                    id="start"
+                                                    type="datetime-local"
+                                                    name="start"
+                                                    className="form-input"
+                                                    placeholder="Appointment Start Date"
+                                                    required
+                                                    value={selectedEvent?.start || ''} // Use selectedEvent start
+                                                    onChange={(e) => setSelectedEvent({ ...selectedEvent, start: e.target.value })}
+                                                />
+                                                <div className="text-danger mt-2" id="startDateErr"></div>
+                                            </div>
+
+                                            <div>
+                                                <label htmlFor="dateEnd">To :</label>
+                                                <input
+                                                    id="end"
+                                                    type="datetime-local"
+                                                    name="end"
+                                                    className="form-input"
+                                                    placeholder="Appointment End Date"
+                                                    required
+                                                    value={selectedEvent?.end || ''} // Use selectedEvent end
+                                                    onChange={(e) => setSelectedEvent({ ...selectedEvent, end: e.target.value })}
+                                                />
+                                                <div className="text-danger mt-2" id="endDateErr"></div>
+                                            </div>
+
+                                            <div>
+                                                <label htmlFor="description">Appointment Description :</label>
+                                                <textarea
+                                                    id="description"
+                                                    name="description"
+                                                    className="form-textarea min-h-[130px]"
+                                                    placeholder="Enter Appointment Description"
+                                                    value={selectedEvent?.description || ''} // Use selectedEvent description
+                                                    onChange={(e) => setSelectedEvent({ ...selectedEvent, description: e.target.value })}
+                                                ></textarea>
+                                            </div>
+
+                                            <div>
+                                                <label htmlFor="Event">Select Appointment Type</label>
+                                                <div className="relative text-white-dark">
+                                                    <select
+                                                        id="Event"
+                                                        className="form-input ps-10 placeholder:text-white-dark"
+                                                        value={selectedEvent?.type || ''} // Use selectedEvent eventId
+                                                        onChange={(e) => setSelectedEvent({ ...selectedEvent, type: Number(e.target.value) })}
+                                                    >
+                                                        <option value="" disabled>
+                                                            Select Type
+                                                        </option>
+                                                        {events.length > 0 ? (
+                                                            events.map((event) => (
+                                                                <option key={event.eventId} value={event.eventId}>
+                                                                    {event.eventName}
+                                                                </option>
+                                                            ))
+                                                        ) : (
+                                                            <option value="" disabled>
+                                                                No types available
+                                                            </option>
+                                                        )}
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label htmlFor="Status">Select Appointment Status</label>
+                                                <div className="relative text-white-dark">
+                                                    <select
+                                                        id="Status"
+                                                        className="form-input ps-10 placeholder:text-white-dark"
+                                                        value={selectedEvent?.className || ''}
+                                                        onChange={(e) => setSelectedEvent({ ...selectedEvent, className: Number(e.target.value) })}
+                                                    >
+                                                        <option value="" disabled>
+                                                            Select Status
+                                                        </option>
+                                                        {status.length > 0 ? (
+                                                            status.map((stat) => (
+                                                                <option key={stat.statusId} value={stat.statusId}>
+                                                                    {stat.statusName}
+                                                                </option>
+                                                            ))
+                                                        ) : (
+                                                            <option value="" disabled>
+                                                                No status available
+                                                            </option>
+                                                        )}
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex justify-end items-center !mt-8">
+                                                <button type="button" className="btn btn-outline-danger" onClick={() => setModalEdit(false)}>
+                                                    Cancel
+                                                </button>
+                                                <button type="submit" className="btn btn-primary ltr:ml-4 rtl:mr-4">
+                                                    Update Appointment
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
         </div>
     );
 };

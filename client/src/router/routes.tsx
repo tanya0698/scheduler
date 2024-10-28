@@ -1,6 +1,6 @@
 import { lazy } from 'react';
-const Home = lazy(() => import('../pages/Finance'));
-const Finance = lazy(() => import('../pages/Finance'));
+const Home = lazy(() => import('../pages/Dashboard'));
+const Finance = lazy(() => import('../pages/Dashboard'));
 const Calendar = lazy(() => import('../pages/Apps/Calendar'));
 const Tabs = lazy(() => import('../pages/Components/Tabs'));
 const Accordians = lazy(() => import('../pages/Components/Accordians'));

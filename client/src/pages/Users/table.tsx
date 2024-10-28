@@ -45,7 +45,7 @@ const UsersTable = () => {
 
     const fetchRoles = async () => {
         try {
-            const response = await axios.get('http://192.168.1.55:4002/api/roles');
+            const response = await axios.get('http://localhost:4002/api/roles');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -64,7 +64,7 @@ const UsersTable = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get('http://192.168.1.55:4002/api/users');
+            const response = await axios.get('http://localhost:4002/api/users');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -87,7 +87,7 @@ const UsersTable = () => {
 
     const fetchUserDetails = async (userId: any) => {
         try {
-            const response = await axios.get(`http://192.168.1.55:4002/api/users/${userId}`);
+            const response = await axios.get(`http://localhost:4002/api/editing/${userId}`);
             console.log('User Details:', response.data);
 
             if (response.data.success) {
@@ -98,7 +98,7 @@ const UsersTable = () => {
                     title: user.fullname,
                     email: user.email,
                     phone: user.phone,
-                    type: user.roleId,
+                    type: user.role,
                 };
 
                 // Set the selected event to the formatted event object
@@ -152,165 +152,6 @@ const UsersTable = () => {
 
     const header = ['Number', 'Name', 'Email', 'Phone', 'Address', 'Role'];
 
-    const handleDownloadExcel = () => {
-        downloadExcel({
-            fileName: 'users.xlsx',
-            sheet: 'Users',
-            tablePayload: {
-                header: ['Number', 'Name', 'Email', 'Phone', 'Address', 'Role'],
-                body: initialRecords.map((record) => [record.userId, record.fullname, record.email, record.phone, record.address, record.role]),
-            },
-        });
-    };
-
-    const exportTable = (type: any) => {
-        let columns: any = col;
-        let records = initialRecords;
-        let filename = 'table';
-
-        let newVariable: any;
-        newVariable = window.navigator;
-
-        if (type === 'csv') {
-            let coldelimiter = ';';
-            let linedelimiter = '\n';
-            let result = columns
-                .map((d: any) => {
-                    return capitalize(d);
-                })
-                .join(coldelimiter);
-            result += linedelimiter;
-            // eslint-disable-next-line array-callback-return
-            records.map((item: any) => {
-                // eslint-disable-next-line array-callback-return
-                columns.map((d: any, index: any) => {
-                    if (index > 0) {
-                        result += coldelimiter;
-                    }
-                    let val = item[d] ? item[d] : '';
-                    result += val;
-                });
-                result += linedelimiter;
-            });
-
-            if (result == null) return;
-            if (!result.match(/^data:text\/csv/i) && !newVariable.msSaveOrOpenBlob) {
-                var data = 'data:application/csv;charset=utf-8,' + encodeURIComponent(result);
-                var link = document.createElement('a');
-                link.setAttribute('href', data);
-                link.setAttribute('download', filename + '.csv');
-                link.click();
-            } else {
-                var blob = new Blob([result]);
-                if (newVariable.msSaveOrOpenBlob) {
-                    newVariable.msSaveBlob(blob, filename + '.csv');
-                }
-            }
-        } else if (type === 'print') {
-            var rowhtml = '<p>' + filename + '</p>';
-            rowhtml +=
-                '<table style="width: 100%; " cellpadding="0" cellcpacing="0"><thead><tr style="color: #515365; background: #eff5ff; -webkit-print-color-adjust: exact; print-color-adjust: exact; "> ';
-            // eslint-disable-next-line array-callback-return
-            columns.map((d: any) => {
-                rowhtml += '<th>' + capitalize(d) + '</th>';
-            });
-            rowhtml += '</tr></thead>';
-            rowhtml += '<tbody>';
-
-            // eslint-disable-next-line array-callback-return
-            records.map((item: any) => {
-                rowhtml += '<tr>';
-                // eslint-disable-next-line array-callback-return
-                columns.map((d: any) => {
-                    let val = item[d] ? item[d] : '';
-                    rowhtml += '<td>' + val + '</td>';
-                });
-                rowhtml += '</tr>';
-            });
-            rowhtml +=
-                '<style>body {font-family:Arial; color:#495057;}p{text-align:center;font-size:18px;font-weight:bold;margin:15px;}table{ border-collapse: collapse; border-spacing: 0; }th,td{font-size:12px;text-align:left;padding: 4px;}th{padding:8px 4px;}tr:nth-child(2n-1){background:#f7f7f7; }</style>';
-            rowhtml += '</tbody></table>';
-            var winPrint: any = window.open('', '', 'left=0,top=0,width=1000,height=600,toolbar=0,scrollbars=0,status=0');
-            winPrint.document.write('<title>Print</title>' + rowhtml);
-            winPrint.document.close();
-            winPrint.focus();
-            winPrint.print();
-        } else if (type === 'txt') {
-            let coldelimiter = ',';
-            let linedelimiter = '\n';
-            let result = columns
-                .map((d: any) => {
-                    return capitalize(d);
-                })
-                .join(coldelimiter);
-            result += linedelimiter;
-            // eslint-disable-next-line array-callback-return
-            records.map((item: any) => {
-                // eslint-disable-next-line array-callback-return
-                columns.map((d: any, index: any) => {
-                    if (index > 0) {
-                        result += coldelimiter;
-                    }
-                    let val = item[d] ? item[d] : '';
-                    result += val;
-                });
-                result += linedelimiter;
-            });
-
-            if (result == null) return;
-            if (!result.match(/^data:text\/txt/i) && !newVariable.msSaveOrOpenBlob) {
-                var data1 = 'data:application/txt;charset=utf-8,' + encodeURIComponent(result);
-                var link1 = document.createElement('a');
-                link1.setAttribute('href', data1);
-                link1.setAttribute('download', filename + '.txt');
-                link1.click();
-            } else {
-                var blob1 = new Blob([result]);
-                if (newVariable.msSaveOrOpenBlob) {
-                    newVariable.msSaveBlob(blob1, filename + '.txt');
-                }
-            }
-        }
-    };
-
-    const capitalize = (text: any) => {
-        return text
-            .replace('_', ' ')
-            .replace('-', ' ')
-            .toLowerCase()
-            .split(' ')
-            .map((s: any) => s.charAt(0).toUpperCase() + s.substring(1))
-            .join(' ');
-    };
-
-    const handleEdit = (row: any) => {
-        // Logic to view the appointment details
-        console.log('Editing:', row);
-    };
-
-    const handleDelete = async (userId: any) => {
-        if (confirm('Are you sure you want to delete this user?')) {
-            try {
-                const response = await axios.delete(`http://192.168.1.55:4002/api/users/${userId}`);
-                console.log('Delete Response:', response.data);
-
-                if (response.data.success) {
-                    // Optionally remove the user row from the table
-                    const row = document.getElementById(`user-row-${userId}`);
-                    if (row) {
-                        // row.parentNode.removeChild(row);
-                    }
-                    alert('User deleted successfully.');
-                } else {
-                    alert('Failed to delete user: ' + response.data.message);
-                }
-            } catch (error) {
-                console.error('Error deleting user:', error);
-                alert('An error occurred while trying to delete the user.');
-            }
-        }
-    };
-
     const formatDate = (dateString: string | number | Date) => {
         const date = new Date(dateString);
         const year = date.getFullYear();
@@ -362,7 +203,7 @@ const UsersTable = () => {
                 roleId,
             });
 
-            const response = await axios.post('http://192.168.1.55:4002/api/register', {
+            const response = await axios.post('http://localhost:4002/api/register', {
                 fullname,
                 phone,
                 email,
@@ -402,7 +243,7 @@ const UsersTable = () => {
 
         try {
             // Send the PUT request with the updated appointment details
-            const response = await axios.put(`http://192.168.1.55:4002/api/update_user/${selectedUser.id}`, updatedUserData);
+            const response = await axios.put(`http://localhost:4002/api/update_user/${selectedUser.id}`, updatedUserData);
 
             if (response.data.success) {
                 console.log('User updated successfully:', response.data.message);
@@ -421,6 +262,36 @@ const UsersTable = () => {
         }
     };
 
+    const handleEdit = async (userId: string) => {
+        await fetchUserDetails(userId); // Fetch appointment details
+        setModalEdit(true); // Show the modal
+    };
+
+    const deleteUser = async (userId: string) => {
+        try {
+            const response = await axios.delete(`http://localhost:4002/api/editing/${userId}`);
+            console.log('Delete Response:', response.data);
+
+            if (response.data.success) {
+                showMessage('User has been deleted successfully.');
+                console.log('User deleted successfully:', response.data.message);
+            } else {
+                showMessage('Failed to delete user. Please try again!');
+                console.error('Failed to delete user:', response.data.message);
+            }
+        } catch (error) {
+            console.error('Error deleting user:', error);
+        }
+    };
+
+    // Example usage of deleteAppointment function
+    const handleDelete = async (userId: string) => {
+        const confirmDelete = window.confirm('Are you sure you want to delete this user?');
+        if (confirmDelete) {
+            await deleteUser(userId);
+        }
+    };
+
     return (
         <div>
             <ul className="flex space-x-2 rtl:space-x-reverse">
@@ -436,16 +307,6 @@ const UsersTable = () => {
             <div className="panel mt-6">
                 <div className="flex md:items-center justify-between md:flex-row flex-col mb-4.5 gap-5">
                     <div className="flex items-center flex-wrap">
-                        <button type="button" className="btn btn-primary btn-sm m-1" onClick={handleDownloadExcel}>
-                            <IconFile className="w-5 h-5 ltr:mr-2 rtl:ml-2" />
-                            EXCEL
-                        </button>
-
-                        <button type="button" onClick={() => exportTable('print')} className="btn btn-primary btn-sm m-1">
-                            <IconPrinter className="ltr:mr-2 rtl:ml-2" />
-                            PRINT
-                        </button>
-
                         <button type="button" className="btn btn-primary" onClick={() => setModal1(true)}>
                             <IconPlus className="ltr:mr-2 rtl:ml-2" />
                             Create User
@@ -475,23 +336,14 @@ const UsersTable = () => {
                                         <ul className="flex items-center justify-center gap-2">
                                             <li>
                                                 <Tippy content="Edit">
-                                                    <button
-                                                        type="button"
-                                                        onClick={(event) => {
-                                                            const userId = row.userId; // Assuming userId is the userId
-                                                            console.log('Clicked User ID:', userId);
-                                                            // Fetch or display details for this specific appointment
-                                                            fetchUserDetails(userId);
-                                                            setModalEdit(true);
-                                                        }}
-                                                    >
+                                                    <button type="button" onClick={() => handleEdit(row.userId)}>
                                                         <IconPencil className="text-success" />
                                                     </button>
                                                 </Tippy>
                                             </li>
                                             <li>
                                                 <Tippy content="Delete">
-                                                    <button type="button">
+                                                    <button type="button" onClick={() => handleDelete(row.userId)}>
                                                         <IconTrashLines className="text-danger" />
                                                     </button>
                                                 </Tippy>

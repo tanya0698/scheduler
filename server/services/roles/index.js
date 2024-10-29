@@ -6,9 +6,9 @@ const router = express.Router();
 const app = express();
 
 router.post("/create_role", async (req, res) => {
-  let connection; // Declare a variable to hold the connection instance
+  let poolInstance; // Declare a variable to hold the pool instance
   try {
-    connection = await pool.getConnection(); // Get a connection from the pool
+    poolInstance = await pool; // Await the pool promise to get the connected instance
 
     const { roleName } = req.body;
 
@@ -16,40 +16,39 @@ router.post("/create_role", async (req, res) => {
     if (!roleName) {
       return res
         .status(400)
-        .json({ success: false, error: "Role name is required" });
+        .json({ success: false, error: "All fields are required" });
     }
 
     const query = `
       INSERT INTO roles (roleName, createdAt)
-      VALUES (?, NOW())
+      VALUES (@roleName, GETDATE())
     `;
 
-    // Execute the query using the connection instance
-    await connection.query(query, [roleName]);
+    // Execute the query using the connected pool instance
+    await poolInstance.request().input("roleName", roleName).query(query);
 
     res.status(201).json({ success: true, message: "Role added successfully" });
   } catch (ex) {
     console.error("Database query error:", ex); // Log the error for debugging
     res.status(500).json({ success: false, error: ex.message });
-  } finally {
-    if (connection) connection.release(); // Release the connection back to the pool
   }
+  // No need to close the pool here; it should remain open for future requests
 });
 
 router.get("/roles", async (req, res) => {
-  let connection; // Declare a variable to hold the connection instance
+  let poolInstance; // Declare a variable to hold the pool instance
   try {
-    connection = await pool.getConnection(); // Get a connection from the pool
+    poolInstance = await pool; // Await the pool promise to get the connected instance
 
-    const [roles] = await connection.query("SELECT * FROM roles"); // Execute the query to fetch roles
+    const result = await poolInstance.request().query("SELECT * FROM roles");
+    const roles = result.recordset;
 
-    res.status(200).json({ success: true, data: roles }); // Return the roles data
+    res.status(200).json({ success: true, data: roles });
   } catch (ex) {
     console.error("Database query error:", ex); // Log the error for debugging
-    res.status(500).json({ success: false, error: ex.message }); // Return error response
-  } finally {
-    if (connection) connection.release(); // Release the connection back to the pool
+    res.status(500).json({ success: false, error: ex.message });
   }
+  // No need to close the pool here; it should remain open for future requests
 });
 
 module.exports = router;

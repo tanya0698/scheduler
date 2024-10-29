@@ -2,10 +2,10 @@ const mssql = require("mssql");
 require("dotenv").config();
 
 const config = {
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  server: process.env.DB_SERVER,
-  database: process.env.DB_NAME,
+  user: "echipuka",
+  password: "Starcreed@0698",
+  server: "192.168.1.55",
+  database: "scheduler",
   driver: "tedious",
   options: {
     trustServerCertificate: true,

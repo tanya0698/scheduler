@@ -717,7 +717,7 @@ const Export = () => {
                                                         id="Event"
                                                         className="form-input ps-10 placeholder:text-white-dark"
                                                         value={selectedEvent?.type || ''} // Use selectedEvent eventId
-                                                        onChange={(e) => setSelectedEvent({ ...selectedEvent, type: Number(e.target.value) })}
+                                                        onChange={(e) => setSelectedEvent({ ...selectedEvent, type: e.target.value })}
                                                     >
                                                         <option value="" disabled>
                                                             Select Type
@@ -744,7 +744,7 @@ const Export = () => {
                                                         id="Status"
                                                         className="form-input ps-10 placeholder:text-white-dark"
                                                         value={selectedEvent?.className || ''}
-                                                        onChange={(e) => setSelectedEvent({ ...selectedEvent, className: Number(e.target.value) })}
+                                                        onChange={(e) => setSelectedEvent({ ...selectedEvent, className: e.target.value })}
                                                     >
                                                         <option value="" disabled>
                                                             Select Status

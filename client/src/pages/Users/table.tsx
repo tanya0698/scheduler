@@ -610,7 +610,7 @@ const UsersTable = () => {
                                                         id="type"
                                                         className="form-input ps-10 placeholder:text-white-dark"
                                                         value={selectedUser?.type || ''} // Use selectedEvent eventId
-                                                        onChange={(e) => setSelectedUser({ ...selectedUser, type: Number(e.target.value) })}
+                                                        onChange={(e) => setSelectedUser({ ...selectedUser, type: e.target.value })}
                                                     >
                                                         <option value="" disabled>
                                                             Select Role

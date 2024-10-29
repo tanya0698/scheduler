@@ -1,14 +1,13 @@
 "use strict";
 const express = require("express");
-const { pool } = require("../../dbconfig");
+const { connectToMongoDB } = require("../../dbconfig");
 const router = express.Router();
 
-const app = express();
-
 router.post("/create_status", async (req, res) => {
-  let poolInstance; // Declare a variable to hold the pool instance
+  let db;
   try {
-    poolInstance = await pool; // Await the pool promise to get the connected instance
+    // Connect to MongoDB
+    db = await connectToMongoDB();
 
     const { statusName } = req.body;
 
@@ -19,13 +18,14 @@ router.post("/create_status", async (req, res) => {
         .json({ success: false, error: "All fields are required" });
     }
 
-    const query = `
-      INSERT INTO status (statusName, createdAt)
-      VALUES (@statusName, GETDATE())
-    `;
+    // Create a new status object
+    const newStatus = {
+      statusName,
+      createdAt: new Date(), // Use the current date and time
+    };
 
-    // Execute the query using the connected pool instance
-    await poolInstance.request().input("statusName", statusName).query(query);
+    // Insert the new status into the "status" collection
+    await db.collection("status").insertOne(newStatus);
 
     res
       .status(201)
@@ -34,23 +34,24 @@ router.post("/create_status", async (req, res) => {
     console.error("Database query error:", ex); // Log the error for debugging
     res.status(500).json({ success: false, error: ex.message });
   }
-  // No need to close the pool here; it should remain open for future requests
+  // No need to close the connection here; it should remain open for future requests
 });
 
 router.get("/status", async (req, res) => {
-  let poolInstance; // Declare a variable to hold the pool instance
+  let db;
   try {
-    poolInstance = await pool; // Await the pool promise to get the connected instance
+    // Connect to MongoDB
+    db = await connectToMongoDB();
 
-    const result = await poolInstance.request().query("SELECT * FROM status");
-    const status = result.recordset;
+    // Query the "status" collection
+    const status = await db.collection("status").find({}).toArray();
 
     res.status(200).json({ success: true, data: status });
   } catch (ex) {
     console.error("Database query error:", ex); // Log the error for debugging
     res.status(500).json({ success: false, error: ex.message });
   }
-  // No need to close the pool here; it should remain open for future requests
+  // No need to close the connection here; it should remain open for future requests
 });
 
 module.exports = router;

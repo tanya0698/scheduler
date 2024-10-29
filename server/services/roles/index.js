@@ -1,14 +1,13 @@
 "use strict";
 const express = require("express");
-const { pool } = require("../../dbconfig");
+const { connectToMongoDB } = require("../../dbconfig");
 const router = express.Router();
 
-const app = express();
-
 router.post("/create_role", async (req, res) => {
-  let poolInstance; // Declare a variable to hold the pool instance
+  let db;
   try {
-    poolInstance = await pool; // Await the pool promise to get the connected instance
+    // Connect to MongoDB
+    db = await connectToMongoDB();
 
     const { roleName } = req.body;
 
@@ -19,36 +18,38 @@ router.post("/create_role", async (req, res) => {
         .json({ success: false, error: "All fields are required" });
     }
 
-    const query = `
-      INSERT INTO roles (roleName, createdAt)
-      VALUES (@roleName, GETDATE())
-    `;
+    // Create a new role object
+    const newRole = {
+      roleName,
+      createdAt: new Date(), // Use the current date and time
+    };
 
-    // Execute the query using the connected pool instance
-    await poolInstance.request().input("roleName", roleName).query(query);
+    // Insert the new role into the "roles" collection
+    await db.collection("roles").insertOne(newRole);
 
     res.status(201).json({ success: true, message: "Role added successfully" });
   } catch (ex) {
     console.error("Database query error:", ex); // Log the error for debugging
     res.status(500).json({ success: false, error: ex.message });
   }
-  // No need to close the pool here; it should remain open for future requests
+  // No need to close the connection here; it should remain open for future requests
 });
 
 router.get("/roles", async (req, res) => {
-  let poolInstance; // Declare a variable to hold the pool instance
+  let db;
   try {
-    poolInstance = await pool; // Await the pool promise to get the connected instance
+    // Connect to MongoDB
+    db = await connectToMongoDB();
 
-    const result = await poolInstance.request().query("SELECT * FROM roles");
-    const roles = result.recordset;
+    // Query the "roles" collection
+    const roles = await db.collection("roles").find({}).toArray();
 
     res.status(200).json({ success: true, data: roles });
   } catch (ex) {
     console.error("Database query error:", ex); // Log the error for debugging
     res.status(500).json({ success: false, error: ex.message });
   }
-  // No need to close the pool here; it should remain open for future requests
+  // No need to close the connection here; it should remain open for future requests
 });
 
 module.exports = router;

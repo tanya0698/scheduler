@@ -1,21 +1,11 @@
 "use strict";
 const express = require("express");
-const { pool } = require("../../dbconfig");
+const { connectToMongoDB } = require("../../dbconfig");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 const router = express.Router();
 const bcrypt = require("bcrypt");
-const {
-  findEmail,
-  findUser,
-  generateToken,
-  findToken,
-  verifyToken,
-  updateUserPassword,
-  removeToken,
-} = require("../../utility/auth");
-
-const app = express();
+const { generateToken, verifyToken } = require("../../utility/auth");
 
 const emailConfig = {
   host: process.env.EMAIL_HOST,
@@ -28,9 +18,10 @@ const emailConfig = {
 };
 
 router.post("/login", async (req, res) => {
-  let poolInstance; // Declare a variable to hold the pool instance
+  let db;
   try {
-    poolInstance = await pool; // Await the pool promise to get the connected instance
+    // Connect to MongoDB
+    db = await connectToMongoDB();
 
     const { email, password } = req.body;
 
@@ -42,23 +33,15 @@ router.post("/login", async (req, res) => {
     }
 
     // Check if email exists
-    const emailQuery = `
-      SELECT * FROM users
-      WHERE email = @email
-    `;
-    const emailResult = await poolInstance
-      .request()
-      .input("email", email)
-      .query(emailQuery);
+    const user = await db.collection("users").findOne({ email });
 
-    if (emailResult.recordset.length === 0) {
+    if (!user) {
       return res
         .status(400)
         .json({ success: false, error: "Email does not exist" });
     }
 
-    // Get the stored password and role
-    const user = emailResult.recordset[0];
+    // Get the stored password and roleId
     const storedPassword = user.password;
     const roleId = user.roleId; // Assuming roleId is stored in the user record
 
@@ -83,13 +66,14 @@ router.post("/login", async (req, res) => {
     console.error("Login error:", ex); // Log the error for debugging
     res.status(500).json({ success: false, error: ex.message });
   }
-  // No need to close the pool here; it should remain open for future requests
+  // No need to close the connection here; it should remain open for future requests
 });
 
 router.post("/register", async (req, res) => {
-  let poolInstance; // Declare a variable to hold the pool instance
+  let db;
   try {
-    poolInstance = await pool; // Await the pool promise to get the connected instance
+    // Connect to MongoDB
+    db = await connectToMongoDB();
 
     const { fullname, email, password, cpassword, roleId } = req.body;
 
@@ -109,16 +93,9 @@ router.post("/register", async (req, res) => {
     }
 
     // Check if email already exists
-    const emailQuery = `
-      SELECT * FROM users
-      WHERE email = @email
-    `;
-    const emailResult = await poolInstance
-      .request()
-      .input("email", email)
-      .query(emailQuery);
+    const existingUser = await db.collection("users").findOne({ email });
 
-    if (emailResult.recordset.length > 0) {
+    if (existingUser) {
       return res
         .status(400)
         .json({ success: false, error: "Email already exists" });
@@ -129,17 +106,15 @@ router.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Create the user
-    const query = `
-      INSERT INTO users (fullname, email, password, roleId, createdAt)
-      VALUES (@fullname, @email, @password, @roleId, GETDATE())
-    `;
-    await poolInstance
-      .request()
-      .input("fullname", fullname)
-      .input("email", email)
-      .input("password", hashedPassword)
-      .input("roleId", roleId)
-      .query(query);
+    const newUser = {
+      fullname,
+      email,
+      password: hashedPassword,
+      roleId,
+      createdAt: new Date(), // Use the current date and time
+    };
+
+    await db.collection("users").insertOne(newUser);
 
     res
       .status(201)
@@ -148,7 +123,7 @@ router.post("/register", async (req, res) => {
     console.error("Registration error:", ex); // Log the error for debugging
     res.status(500).json({ success: false, error: ex.message });
   }
-  // No need to close the pool here; it should remain open for future requests
+  // No need to close the connection here; it should remain open for future requests
 });
 
 router.post("/forgot_password", async (req, res) => {
@@ -159,27 +134,19 @@ router.post("/forgot_password", async (req, res) => {
     return res.status(400).json({ success: false, error: "Email is required" });
   }
 
-  let poolInstance; // Declare a variable to hold the pool instance
+  let db;
   try {
-    poolInstance = await pool; // Await the pool promise to get the connected instance
+    // Connect to MongoDB
+    db = await connectToMongoDB();
 
     // Check if email exists
-    const emailQuery = `
-      SELECT * FROM users
-      WHERE email = @Email
-    `;
-    const emailResult = await poolInstance
-      .request()
-      .input("Email", email)
-      .query(emailQuery);
+    const foundUser = await db.collection("users").findOne({ email });
 
-    if (emailResult.recordset.length === 0) {
+    if (!foundUser) {
       return res
         .status(400)
         .json({ success: false, error: "Email does not exist" });
     }
-
-    const foundUser = emailResult.recordset[0];
 
     // Generate a secure token
     const token = await generateToken(foundUser); // Ensure this function is defined
@@ -197,13 +164,11 @@ router.post("/forgot_password", async (req, res) => {
     console.log("Email sent");
 
     // Store the token in the database
-    await poolInstance
-      .request()
-      .input("Email", foundUser.email)
-      .input("Token", token).query(`
-        INSERT INTO password_resets (email, token, updatedAt)
-        VALUES (@Email, @Token, GETDATE())
-      `);
+    await db.collection("password_resets").insertOne({
+      email: foundUser.email,
+      token: token,
+      updatedAt: new Date(), // Use the current date and time
+    });
 
     // Respond with a success message
     return res.status(200).json({
@@ -221,7 +186,7 @@ router.post("/forgot_password", async (req, res) => {
       error: "An error occurred. Please try again later.",
     });
   }
-  // No need to close the pool here; it should remain open for future requests
+  // No need to close the connection here; it should remain open for future requests
 });
 
 router.post("/reset_password/:token/:email", async (req, res) => {
@@ -243,22 +208,17 @@ router.post("/reset_password/:token/:email", async (req, res) => {
       .json({ success: false, error: "Passwords do not match" });
   }
 
-  let poolInstance; // Declare a variable to hold the pool instance
+  let db;
   try {
-    poolInstance = await pool; // Await the pool promise to get the connected instance
+    // Connect to MongoDB
+    db = await connectToMongoDB();
 
     // Verify the token and email
-    const tokenQuery = `
-      SELECT * FROM users
-      WHERE email = @Email AND token = @Token
-    `;
-    const tokenResult = await poolInstance
-      .request()
-      .input("Email", email)
-      .input("Token", token)
-      .query(tokenQuery);
+    const resetRequest = await db
+      .collection("password_resets")
+      .findOne({ email, token });
 
-    if (tokenResult.recordset.length === 0) {
+    if (!resetRequest) {
       return res
         .status(400)
         .json({ success: false, error: "Invalid token or email" });
@@ -267,14 +227,20 @@ router.post("/reset_password/:token/:email", async (req, res) => {
     // Update the user's password
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    await poolInstance
-      .request()
-      .input("Email", email)
-      .input("Password", hashedPassword).query(`
-        UPDATE users
-        SET password = @Password, token = NULL, updatedAt = GETDATE()
-        WHERE email = @Email
-      `);
+
+    await db.collection("users").updateOne(
+      { email },
+      {
+        $set: {
+          password: hashedPassword,
+          token: null, // Clear the token after use
+          updatedAt: new Date(), // Use the current date and time
+        },
+      }
+    );
+
+    // Optionally, you can also remove the token from the password_resets collection
+    await db.collection("password_resets").deleteOne({ email });
 
     // Respond with a success message
     return res.status(200).json({
@@ -288,13 +254,11 @@ router.post("/reset_password/:token/:email", async (req, res) => {
       error: "An error occurred. Please try again later.",
     });
   }
-  // No need to close the pool here; it should remain open for future requests
+  // No need to close the connection here; it should remain open for future requests
 });
 
 router.put("/update_password", async (req, res) => {
-  const { password, cpassword } = req.body;
-  const email = localStorage.getItem("email"); // Note: localStorage is not available on the server side
-  const token = localStorage.getItem("token"); // Note: localStorage is not available on the server side
+  const { password, cpassword, email, token } = req.body; // Get email and token from request body
 
   // Check if password and confirm password match
   if (password !== cpassword) {
@@ -303,11 +267,12 @@ router.put("/update_password", async (req, res) => {
       .json({ success: false, error: "Passwords do not match" });
   }
 
-  let poolInstance; // Declare a variable to hold the pool instance
+  let db;
   try {
-    poolInstance = await pool; // Await the pool promise to get the connected instance
+    // Connect to MongoDB
+    db = await connectToMongoDB();
 
-    // Verify the token (you need to implement this logic)
+    // Verify the token
     const isValidToken = verifyToken(token); // Ensure this function is defined
 
     if (!isValidToken) {
@@ -315,16 +280,9 @@ router.put("/update_password", async (req, res) => {
     }
 
     // Check if the email exists in the database
-    const emailQuery = `
-      SELECT * FROM users
-      WHERE email = @Email
-    `;
-    const emailResult = await poolInstance
-      .request()
-      .input("Email", email)
-      .query(emailQuery);
+    const user = await db.collection("users").findOne({ email });
 
-    if (emailResult.recordset.length === 0) {
+    if (!user) {
       return res
         .status(400)
         .json({ success: false, error: "Email not found in the database" });
@@ -335,16 +293,16 @@ router.put("/update_password", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Update the user's password in the database
-    const updateQuery = `
-      UPDATE users
-      SET password = @Password, token = NULL, updatedAt = GETDATE()
-      WHERE email = @Email
-    `;
-    await poolInstance
-      .request()
-      .input("Password", hashedPassword)
-      .input("Email", email)
-      .query(updateQuery);
+    await db.collection("users").updateOne(
+      { email },
+      {
+        $set: {
+          password: hashedPassword,
+          token: null, // Clear the token if applicable
+          updatedAt: new Date(), // Use the current date and time
+        },
+      }
+    );
 
     return res
       .status(200)
@@ -353,37 +311,53 @@ router.put("/update_password", async (req, res) => {
     console.error("Error:", ex); // Log the error
     return res.status(500).json({ success: false, error: ex.message });
   }
-  // No need to close the pool here; it should remain open for future requests
+  // No need to close the connection here; it should remain open for future requests
 });
-
 router.get("/users", async (req, res) => {
-  let poolInstance; // Declare a variable to hold the pool instance
+  let db;
   try {
-    poolInstance = await pool; // Await the pool promise to get the connected instance
+    // Connect to MongoDB
+    db = await connectToMongoDB();
 
-    const query = `
-  SELECT 
-    a.userId,
-    a.fullname, 
-    a.email, 
-    a.phone, 
-    a.address, 
-    e.roleName AS role
-  FROM 
-    users a
-  INNER JOIN 
-    roles e ON a.roleId = e.roleId
-`;
-
-    const result = await poolInstance.request().query(query); // Use the connected pool instance
-    const users = result.recordset;
+    // Retrieve users with their roles
+    const users = await db
+      .collection("users")
+      .aggregate([
+        {
+          $lookup: {
+            from: "roles", // The collection to join
+            localField: "roleId", // Field from the input documents
+            foreignField: "roleId", // Field from the documents of the "from" collection
+            as: "roleInfo", // Output array field
+          },
+        },
+        {
+          $unwind: {
+            // Deconstructs the array field from the lookup stage
+            path: "$roleInfo",
+            preserveNullAndEmptyArrays: true, // Keep users without roles
+          },
+        },
+        {
+          $project: {
+            // Specify the fields to include in the output
+            userId: "$userId",
+            fullname: "$fullname",
+            email: "$email",
+            phone: "$phone",
+            address: "$address",
+            role: "$roleInfo.roleName", // Get the role name from the joined collection
+          },
+        },
+      ])
+      .toArray(); // Convert the aggregation cursor to an array
 
     res.status(200).json({ success: true, data: users });
   } catch (ex) {
     console.error("Database query error:", ex); // Log the error for debugging
     res.status(500).json({ success: false, error: ex.message });
   }
-  // No need to close the pool here; it should remain open for future requests
+  // No need to close the connection here; it should remain open for future requests
 });
 
 router.get("/users/:email", async (req, res) => {
@@ -396,15 +370,13 @@ router.get("/users/:email", async (req, res) => {
       .json({ success: false, error: "Email parameter is required." });
   }
 
-  let poolInstance; // Declare a variable to hold the pool instance
+  let db;
   try {
-    poolInstance = await pool; // Await the pool promise to get the connected instance
-    const result = await poolInstance
-      .request()
-      .input("Email", email)
-      .query("SELECT * FROM users WHERE email = @Email");
+    // Connect to MongoDB
+    db = await connectToMongoDB();
 
-    const user = result.recordset[0];
+    // Find the user by email
+    const user = await db.collection("users").findOne({ email });
 
     if (user) {
       return res.status(200).json({ success: true, data: user });
@@ -417,11 +389,11 @@ router.get("/users/:email", async (req, res) => {
     console.error("Error:", ex); // Log the error
     return res.status(500).json({ success: false, error: ex.message });
   }
-  // No need to close the pool here; it should remain open for future requests
+  // No need to close the connection here; it should remain open for future requests
 });
 
 router.put("/update_user/:userId", async (req, res) => {
-  const userId = parseInt(req.params.userId);
+  const userId = req.params.userId; // Assuming userId is a string in MongoDB
   const { fullname, email, roleId } = req.body;
 
   // Check if at least one field is present
@@ -432,58 +404,38 @@ router.put("/update_user/:userId", async (req, res) => {
     });
   }
 
-  let poolInstance; // Declare a variable to hold the pool instance
+  let db;
   try {
-    poolInstance = await pool; // Await the pool promise to get the connected instance
+    // Connect to MongoDB
+    db = await connectToMongoDB();
 
     // Check if email already exists for another user
     if (email) {
-      const emailQuery = `
-        SELECT * FROM users
-        WHERE email = @Email AND userId != @User Id
-      `;
-      const emailResult = await poolInstance
-        .request()
-        .input("Email", email)
-        .input("User Id", userId)
-        .query(emailQuery);
+      const existingUser = await db.collection("users").findOne({
+        email: email,
+        userId: { $ne: userId }, // Ensure that the userId is not the same
+      });
 
-      if (emailResult.recordset.length > 0) {
+      if (existingUser) {
         return res
           .status(400)
           .json({ success: false, error: "Email already exists" });
       }
     }
 
-    // Prepare the update query
-    let updateFields = [];
-    let queryParams = poolInstance.request();
-
-    if (fullname) {
-      updateFields.push("fullname = @Fullname");
-      queryParams.input("Fullname", fullname);
-    }
-    if (email) {
-      updateFields.push("email = @Email");
-      queryParams.input("Email", email);
-    }
-    if (roleId) {
-      updateFields.push("roleId = @RoleId");
-      queryParams.input("RoleId", roleId);
-    }
-
-    // Construct the final update query
-    const query = `
-      UPDATE users
-      SET ${updateFields.join(", ")}
-      WHERE userId = @User Id
-    `;
-    queryParams.input("User Id", userId);
+    // Prepare the update object
+    const updateFields = {};
+    if (fullname) updateFields.fullname = fullname;
+    if (email) updateFields.email = email;
+    if (roleId) updateFields.roleId = roleId;
 
     // Execute the update query
-    const result = await queryParams.query(query);
+    const result = await db.collection("users").updateOne(
+      { userId: userId }, // Filter by userId
+      { $set: updateFields } // Update the fields
+    );
 
-    if (result.rowsAffected[0] === 0) {
+    if (result.matchedCount === 0) {
       return res.status(404).json({ success: false, error: "User  not found" });
     }
 
@@ -494,7 +446,7 @@ router.put("/update_user/:userId", async (req, res) => {
     console.error("Error:", ex); // Log the error
     return res.status(500).json({ success: false, error: ex.message });
   }
-  // No need to close the pool here; it should remain open for future requests
+  // No need to close the connection here; it should remain open for future requests
 });
 
 router.put("/update_profile", async (req, res) => {
@@ -502,82 +454,58 @@ router.put("/update_profile", async (req, res) => {
   const currentEmail = localStorage.getItem("email");
   const token = localStorage.getItem("token");
 
-  // Verify the token (you need to implement this logic)
+  // Verify the token
   const isValidToken = verifyToken(token);
 
   if (!isValidToken) {
     return res.status(401).json({ success: false, error: "Invalid token" });
   }
 
-  let poolInstance; // Declare a variable to hold the pool instance
+  let db;
   try {
-    poolInstance = await pool; // Await the pool promise to get the connected instance
+    // Connect to MongoDB
+    db = await connectToMongoDB();
 
     // Check if the current email exists in the database
-    const emailQuery = `
-      SELECT * FROM users
-      WHERE email = @currentEmail
-    `;
-    const emailResult = await poolInstance
-      .request()
-      .input("currentEmail", currentEmail)
-      .query(emailQuery);
+    const user = await db.collection("users").findOne({ email: currentEmail });
 
-    if (emailResult.recordset.length === 0) {
+    if (!user) {
       return res
         .status(400)
         .json({ success: false, error: "Email not found in the database" });
     }
 
-    // Prepare the update query dynamically
-    let updateQuery = `UPDATE users SET `;
-    const updates = [];
-    const params = [];
-
-    // Check for each field and add to the query if it exists
-    if (fullname) {
-      updates.push("fullname = @fullname");
-      params.push({ name: "fullname", value: fullname });
-    }
+    // Prepare the update object
+    const updateFields = {};
+    if (fullname) updateFields.fullname = fullname;
     if (newEmail) {
       // Check if the new email is already in use
-      const emailCheckQuery = `
-        SELECT * FROM users
-        WHERE email = @newEmail AND email != @currentEmail
-      `;
-      const emailCheckResult = await poolInstance
-        .request()
-        .input("newEmail", newEmail)
-        .input("currentEmail", currentEmail)
-        .query(emailCheckQuery);
+      const existingUser = await db.collection("users").findOne({
+        email: newEmail,
+        email: { $ne: currentEmail }, // Ensure the new email is not the current email
+      });
 
-      if (emailCheckResult.recordset.length > 0) {
+      if (existingUser) {
         return res
           .status(400)
           .json({ success: false, error: "Email is already in use" });
       }
 
-      updates.push("email = @newEmail");
-      params.push({ name: "newEmail", value: newEmail });
+      updateFields.email = newEmail;
     }
 
     // If no fields to update, return an error
-    if (updates.length === 0) {
+    if (Object.keys(updateFields).length === 0) {
       return res
         .status(400)
         .json({ success: false, error: "No fields to update" });
     }
 
-    // Construct the final update query
-    updateQuery += updates.join(", ") + " WHERE email = @currentEmail";
-    params.push({ name: "currentEmail", value: currentEmail });
-
     // Execute the update query
-    const request = poolInstance.request();
-    params.forEach((param) => {
-      request.input(param.name, param.value);
-    });
-    await request.query(updateQuery);
+    await db.collection("users").updateOne(
+      { email: currentEmail }, // Filter by current email
+      { $set: updateFields } // Update the fields
+    );
 
     // If the email was updated, update the local storage
     if (newEmail) {
@@ -592,13 +520,14 @@ router.put("/update_profile", async (req, res) => {
     console.error("Error:", ex); // Log the error
     return res.status(500).json({ success: false, error: ex.message });
   }
-  // No need to close the pool here; it should remain open for future requests
+  // No need to close the connection here; it should remain open for future requests
 });
 
 router.post("/create_user", async (req, res) => {
-  let poolInstance; // Declare a variable to hold the pool instance
+  let db;
   try {
-    poolInstance = await pool; // Await the pool promise to get the connected instance
+    // Connect to MongoDB
+    db = await connectToMongoDB();
 
     const { fullname, email, address, phone, roleId } = req.body;
 
@@ -610,34 +539,25 @@ router.post("/create_user", async (req, res) => {
     }
 
     // Check if email already exists
-    const emailQuery = `
-      SELECT * FROM users
-      WHERE email = @email
-    `;
-    const emailResult = await poolInstance
-      .request()
-      .input("email", email)
-      .query(emailQuery);
+    const existingUser = await db.collection("users").findOne({ email: email });
 
-    if (emailResult.recordset.length > 0) {
+    if (existingUser) {
       return res
         .status(400)
         .json({ success: false, error: "Email already exists" });
     }
 
     // Create the user
-    const query = `
-      INSERT INTO users (fullname, email, address, phone, roleId, createdAt)
-      VALUES (@fullname, @email, @address, @phone, @roleId, GETDATE())
-    `;
-    await poolInstance
-      .request()
-      .input("fullname", fullname)
-      .input("email", email)
-      .input("address", address)
-      .input("phone", phone)
-      .input("roleId", roleId)
-      .query(query);
+    const newUser = {
+      fullname,
+      email,
+      address,
+      phone,
+      roleId,
+      createdAt: new Date(), // Use the current date
+    };
+
+    await db.collection("users").insertOne(newUser);
 
     res
       .status(201)
@@ -646,149 +566,109 @@ router.post("/create_user", async (req, res) => {
     console.error("Registration error:", ex); // Log the error for debugging
     res.status(500).json({ success: false, error: ex.message });
   }
-  // No need to close the pool here; it should remain open for future requests
+  // No need to close the connection here; it should remain open for future requests
 });
 
 router.put("/update_user/:userId", async (req, res) => {
   try {
-    const userId = parseInt(req.params.userId);
+    const userId = req.params.userId; // Assuming userId is a string or ObjectId in MongoDB
     const { fullname, email, address, phone, roleId } = req.body;
 
-    const updates = [];
-    const inputs = { appointmentId };
+    // Prepare the update object
+    const updateFields = {};
+    if (fullname) updateFields.fullname = fullname;
+    if (email) updateFields.email = email;
+    if (address) updateFields.address = address;
+    if (phone) updateFields.phone = phone;
+    if (roleId) updateFields.roleId = roleId;
 
-    if (fullname) {
-      updates.push("fullname = @fullname");
-      inputs.fullname = fullname;
-    }
-    if (email) {
-      updates.push("email = @email");
-      inputs.email = email;
-    }
-    if (address) {
-      updates.push("address = @address");
-      inputs.address = address;
-    }
-    if (phone) {
-      updates.push("phone = @phone");
-      inputs.phone = phone;
-    }
-
-    if (roleId) {
-      updates.push("roleId = @roleId");
-      inputs.roleId = roleId;
-    }
-
-    if (updates.length === 0) {
+    // If no fields to update, return an error
+    if (Object.keys(updateFields).length === 0) {
       return res
         .status(400)
         .json({ success: false, error: "No fields to update" });
     }
 
-    const poolInstance = await pool; // Wait for the pool promise to resolve
+    // Connect to MongoDB
+    const db = await connectToMongoDB();
 
-    const result = await poolInstance
-      .request()
-      .input("userId", userId)
-      .input("fullname", inputs.fullname)
-      .input("email", inputs.email)
-      .input("address", inputs.address)
-      .input("phone", inputs.phone)
-      .input("roleId", inputs.roleId)
-      .query(
-        `UPDATE users SET ${updates.join(
-          ", "
-        )}, updatedAt = GETDATE() WHERE userId = @userId`
-      );
+    // Execute the update query
+    const result = await db.collection("users").updateOne(
+      { userId: userId }, // Filter by userId
+      { $set: { ...updateFields, updatedAt: new Date() } } // Update the fields
+    );
 
-    if (result.rowsAffected[0] === 0) {
-      res.status(404).json({ success: false, error: "User not found" });
-    } else {
-      res
-        .status(200)
-        .json({ success: true, message: "User updated successfully" });
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ success: false, error: "User  not found" });
     }
+
+    return res
+      .status(200)
+      .json({ success: true, message: "User  updated successfully" });
   } catch (ex) {
     console.error("Error updating user:", ex);
-    res.status(500).json({ success: false, error: ex.message });
+    return res.status(500).json({ success: false, error: ex.message });
   }
 });
 
 router.get("/editing/:userId", async (req, res) => {
-  let poolInstance; // Declare a variable to hold the pool instance
-  const userId = parseInt(req.params.userId); // Extract userId from the request parameters
+  const userId = req.params.userId; // Extract userId from the request parameters
 
   try {
-    poolInstance = await pool; // Await the pool promise to get the connected instance
+    // Connect to MongoDB
+    const db = await connectToMongoDB();
 
-    // SQL query to fetch the appointment by userId
-    const query = `
-  SELECT 
-    a.userId,
-    a.fullname, 
-    a.address, 
-    a.email, 
-    a.phone, 
-    e.roleName AS role
-  FROM 
-    users a
-  INNER JOIN 
-    roles e ON a.roleId = e.roleId
-  WHERE 
-    a.userId = @userId
-`;
-
-    // Create a request and add the parameter to prevent SQL injection
-    const request = poolInstance.request();
-    request.input("userId", userId); // Assuming userId is an integer
-
-    const result = await request.query(query); // Execute the query
-    const user = result.recordset[0]; // Get the first record
+    // Fetch the user by userId
+    const user = await db.collection("users").findOne({ userId: userId });
 
     if (user) {
-      res.status(200).json({ success: true, data: user });
+      // Assuming roles are stored in a separate collection
+      const role = await db
+        .collection("roles")
+        .findOne({ roleId: user.roleId });
+
+      // Construct the response data
+      const responseData = {
+        userId: user.userId,
+        fullname: user.fullname,
+        address: user.address,
+        email: user.email,
+        phone: user.phone,
+        role: role ? role.roleName : null, // Get the role name if it exists
+      };
+
+      res.status(200).json({ success: true, data: responseData });
     } else {
-      res.status(404).json({ success: false, message: "User was not found" });
+      res.status(404).json({ success: false, message: "User  was not found" });
     }
   } catch (ex) {
     console.error("Database query error:", ex); // Log the error for debugging
     res.status(500).json({ success: false, error: ex.message });
   }
-  // No need to close the pool here; it should remain open for future requests
 });
 
 router.delete("/editing/:userId", async (req, res) => {
-  let poolInstance; // Declare a variable to hold the pool instance
-  const userId = parseInt(req.params.userId); // Extract userId from the request parameters
+  const userId = req.params.userId; // Extract userId from the request parameters
 
   try {
-    poolInstance = await pool; // Await the pool promise to get the connected instance
+    // Connect to MongoDB
+    const db = await connectToMongoDB();
 
-    // SQL query to delete the appointment by userId
-    const query = `
-      DELETE FROM users
-      WHERE userId = @userId
-    `;
+    // Execute the delete operation
+    const result = await db.collection("users").deleteOne({ userId: userId });
 
-    // Create a request and add the parameter to prevent SQL injection
-    const request = poolInstance.request();
-    request.input("userId", userId); // Assuming userId is an integer
-
-    const result = await request.query(query); // Execute the query
-
-    // Check if any rows were affected
-    if (result.rowsAffected[0] > 0) {
+    // Check if any documents were deleted
+    if (result.deletedCount > 0) {
       res
         .status(200)
-        .json({ success: true, message: "User deleted successfully" });
+        .json({ success: true, message: "User  deleted successfully" });
     } else {
-      res.status(404).json({ success: false, message: "User not found" });
+      res.status(404).json({ success: false, message: "User  not found" });
     }
   } catch (ex) {
     console.error("Database query error:", ex); // Log the error for debugging
     res.status(500).json({ success: false, error: ex.message });
   }
-  // No need to close the pool here; it should remain open for future requests
 });
 
 module.exports = router;

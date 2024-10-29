@@ -176,6 +176,12 @@
                 },
                 "cpassword": {
                   "example": "any"
+                },
+                "email": {
+                  "example": "any"
+                },
+                "token": {
+                  "example": "any"
                 }
               }
             }

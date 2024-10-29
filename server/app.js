@@ -10,7 +10,7 @@ const winston = require("winston");
 
 const sf = require("./swagger_output.json");
 const { dd } = require("./utility/index");
-const { pool } = require("./dbconfig");
+const { connectToMongoDB } = require("./dbconfig");
 
 const PORT = process.env.PORT;
 
@@ -92,12 +92,15 @@ app.set("port", process.env.PORT);
 
 (async () => {
   try {
-    const poolInstance = await pool; // Await the pool promise to get the connected instance
-    console.log("Database connection established.");
+    // Establish MongoDB connection
+    const mongoDB = await connectToMongoDB(); // Await the MongoDB connection
+    console.log("MongoDB connection established.");
 
+    // Setting up Swagger documentation
     console.log("Setting up swagger docs...");
     await swaggerAutogen("./swagger_output.json", ["./routes/api.js"]);
 
+    // Start the Express server
     app.listen(PORT, () => {
       console.log(`Server started on port ${PORT}`);
     });

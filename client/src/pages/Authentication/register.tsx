@@ -20,7 +20,7 @@ const RegisterCover = () => {
     const [fullname, setFullname] = useState('');
     const [email, setEmail] = useState('');
     const [roles, setRoles] = useState<{ roleId: number; roleName: string }[]>([]);
-    const [roleId, setRoleId] = useState<number | ''>('');
+    const [roleId, setRoleId] = useState<number | null>(null);
     const [password, setPassword] = useState('');
     const [cpassword, setCpassword] = useState('');
     const [error, setError] = useState('');
@@ -142,8 +142,11 @@ const RegisterCover = () => {
                                         <select
                                             id="Role"
                                             className="form-input ps-10 placeholder:text-white-dark"
-                                            value={roleId}
-                                            onChange={(e) => setRoleId(Number(e.target.value))} // Convert value to number
+                                            value={roleId !== null ? roleId : ''} // Ensure value is a string or empty
+                                            onChange={(e) => {
+                                                const selectedValue = e.target.value;
+                                                setRoleId(selectedValue ? Number(selectedValue) : null); // Convert to number or set to null
+                                            }}
                                         >
                                             <option value="" disabled>
                                                 Select Role

@@ -82,7 +82,7 @@ const Export = () => {
 
     const fetchAppointments = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/appointments');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/appointments');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -111,7 +111,7 @@ const Export = () => {
 
     const fetchEvents = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/events');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/events');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -130,7 +130,7 @@ const Export = () => {
 
     const fetchStatus = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/status');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/status');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -219,7 +219,7 @@ const Export = () => {
                 statusId,
             });
 
-            const response = await axios.post('http://localhost:4002/api/create_appointment', {
+            const response = await axios.post('https://server-side-5zbf.onrender.com/api/create_appointment', {
                 appointmentName,
                 appointmentLocation,
                 appointmentFrom: formattedFrom,
@@ -263,7 +263,7 @@ const Export = () => {
 
         try {
             // Send the PUT request with the updated appointment details
-            const response = await axios.put(`http://localhost:4002/api/update_appointment/${selectedEvent.id}`, updatedAppointmentData);
+            const response = await axios.put(`https://server-side-5zbf.onrender.com/api/update_appointment/${selectedEvent.id}`, updatedAppointmentData);
 
             if (response.data.success) {
                 console.log('Appointment updated successfully:', response.data.message);
@@ -284,7 +284,7 @@ const Export = () => {
 
     const fetchAppointmentDetails = async (appointmentId: string) => {
         try {
-            const response = await axios.get(`http://localhost:4002/api/appointments/${appointmentId}`);
+            const response = await axios.get(`https://server-side-5zbf.onrender.com/api/appointments/${appointmentId}`);
             console.log('Appointment Details:', response.data);
 
             if (response.data.success) {
@@ -329,7 +329,7 @@ const Export = () => {
 
     const deleteAppointment = async (appointmentId: string) => {
         try {
-            const response = await axios.delete(`http://localhost:4002/api/appointments/${appointmentId}`);
+            const response = await axios.delete(`https://server-side-5zbf.onrender.com/api/appointments/${appointmentId}`);
             console.log('Delete Response:', response.data);
 
             if (response.data.success) {

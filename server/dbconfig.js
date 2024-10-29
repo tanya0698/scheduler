@@ -4,7 +4,7 @@ require("dotenv").config();
 const config = {
   user: "echipuka",
   password: "Starcreed@0698",
-  server: "CREED06\\SQLEXPRESS",
+  server: "192.168.1.55",
   database: "scheduler",
   driver: "tedious",
   options: {

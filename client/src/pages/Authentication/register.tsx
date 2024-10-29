@@ -19,7 +19,7 @@ const RegisterCover = () => {
     const dispatch = useDispatch();
     const [fullname, setFullname] = useState('');
     const [email, setEmail] = useState('');
-    const [roles, setRoles] = useState<{ roleId: number; roleName: string }[]>([]);
+    const [roles, setRoles] = useState<{ roleId: string; roleName: string }[]>([]);
     const [roleId, setRoleId] = useState<number | null>(null);
     const [password, setPassword] = useState('');
     const [cpassword, setCpassword] = useState('');

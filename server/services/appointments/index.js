@@ -127,7 +127,7 @@ router.get("/appointments", async (req, res) => {
           $lookup: {
             from: "events", // The events collection
             localField: "eventId", // Field from appointments
-            foreignField: "eventId", // Field from events
+            foreignField: "_id", // Field from events (assuming _id is the foreign key)
             as: "eventDetails", // Output array field
           },
         },
@@ -135,15 +135,21 @@ router.get("/appointments", async (req, res) => {
           $lookup: {
             from: "status", // The status collection
             localField: "statusId", // Field from appointments
-            foreignField: "statusId", // Field from status
+            foreignField: "_id", // Field from status (assuming _id is the foreign key)
             as: "statusDetails", // Output array field
           },
         },
         {
-          $unwind: "$eventDetails", // Unwind the eventDetails array
+          $unwind: {
+            path: "$eventDetails", // Unwind the eventDetails array
+            preserveNullAndEmptyArrays: true, // Keep appointments without event details
+          },
         },
         {
-          $unwind: "$statusDetails", // Unwind the statusDetails array
+          $unwind: {
+            path: "$statusDetails", // Unwind the statusDetails array
+            preserveNullAndEmptyArrays: true, // Keep appointments without status details
+          },
         },
         {
           $project: {
@@ -169,6 +175,7 @@ router.get("/appointments", async (req, res) => {
 
 router.get("/appointments/:appointmentId", async (req, res) => {
   const appointmentId = req.params.appointmentId; // Extract appointmentId from the request parameters
+  console.log("Received appointmentId:", appointmentId); // Debug log
 
   try {
     // Connect to MongoDB
@@ -217,6 +224,8 @@ router.get("/appointments/:appointmentId", async (req, res) => {
         },
       ])
       .toArray(); // Convert the cursor to an array
+
+    console.log("Fetched appointment:", appointment); // Debug log
 
     if (appointment.length > 0) {
       res.status(200).json({ success: true, data: appointment[0] });

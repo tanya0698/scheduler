@@ -33,10 +33,10 @@ const Export = () => {
 
     const [appointmentName, setAppointmentName] = useState('');
     const [appointmentLocation, setAppointmentLocation] = useState('');
-    const [events, setEvents] = useState<{ eventId: number; eventName: string }[]>([]);
-    const [eventId, setEventId] = useState<number | ''>('');
-    const [status, setStatus] = useState<{ statusId: number; statusName: string }[]>([]);
-    const [statusId, setStatusId] = useState<number | ''>('');
+    const [events, setEvents] = useState<{ eventId: string; eventName: string }[]>([]);
+    const [eventId, setEventId] = useState<string | ''>('');
+    const [status, setStatus] = useState<{ statusId: string; statusName: string }[]>([]);
+    const [statusId, setStatusId] = useState<string | ''>('');
     const [appointmentDescription, setAppointmentDescription] = useState('');
     const [appointmentFrom, setAppointmentFrom] = useState('');
     const [appointmentTo, setAppointmentTo] = useState('');
@@ -547,7 +547,7 @@ const Export = () => {
                                                                     name="eventType"
                                                                     value={event.eventId}
                                                                     checked={eventId === event.eventId}
-                                                                    onChange={(e) => setEventId(Number(e.target.value))}
+                                                                    onChange={(e) => setEventId(e.target.value)}
                                                                 />
                                                                 <span className="ltr:pl-2 rtl:pr-2">{event.eventName}</span>
                                                             </label>
@@ -564,7 +564,7 @@ const Export = () => {
                                                         id="Status"
                                                         className="form-input ps-10 placeholder:text-white-dark"
                                                         value={statusId}
-                                                        onChange={(e) => setStatusId(Number(e.target.value))} // Convert value to number
+                                                        onChange={(e) => setStatusId(e.target.value)} // Convert value to number
                                                     >
                                                         <option value="" disabled>
                                                             Select Status

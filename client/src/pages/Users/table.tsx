@@ -40,8 +40,8 @@ const UsersTable = () => {
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [address, setAddress] = useState('');
-    const [roles, setRoles] = useState<{ roleId: number; roleName: string }[]>([]);
-    const [roleId, setRoleId] = useState<number | ''>('');
+    const [roles, setRoles] = useState<{ roleId: string; roleName: string }[]>([]);
+    const [roleId, setRoleId] = useState<string | ''>('');
 
     const fetchRoles = async () => {
         try {
@@ -469,7 +469,7 @@ const UsersTable = () => {
                                                         id="Type"
                                                         className="form-input ps-10 placeholder:text-white-dark"
                                                         value={roleId}
-                                                        onChange={(e) => setRoleId(Number(e.target.value))} // Convert value to number
+                                                        onChange={(e) => setRoleId(e.target.value)} // Convert value to number
                                                     >
                                                         <option value="" disabled>
                                                             Select Role

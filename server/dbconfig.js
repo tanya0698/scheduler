@@ -4,11 +4,8 @@ require("dotenv").config();
 // MongoDB connection URI
 const uri = process.env.MONGO_URI;
 
-// Create a new MongoClient
-const client = new MongoClient(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+// Create a new MongoClient without deprecated options
+const client = new MongoClient(uri);
 
 async function connectToMongoDB() {
   try {

@@ -1,4 +1,4 @@
-const mssql = require("mssql");
+const mysql = require("mysql2/promise"); // Use promise-based API
 require("dotenv").config();
 
 const config = {
@@ -6,22 +6,26 @@ const config = {
   password: process.env.DB_PASSWORD,
   server: process.env.DB_SERVER,
   database: process.env.DB_NAME,
-  driver: "tedious",
+  port: parseInt(process.env.DB_PORT) || 3306, // Default MySQL port is 3306
+  connectTimeout: 30000,
   options: {
     trustServerCertificate: true,
   },
 };
 
-// Create a connection pool and connect to the database
-const poolPromise = new mssql.ConnectionPool(config)
-  .connect()
-  .then((pool) => {
-    console.log("Connected to SQL Server");
-    return pool;
+// Create a connection pool
+const pool = mysql.createPool(config);
+
+// Test the connection
+pool
+  .getConnection()
+  .then((connection) => {
+    console.log("Connected to MySQL");
+    connection.release(); // Release the connection back to the pool
   })
   .catch((err) => {
     console.error("Database connection failed:", err);
     process.exit(1); // Exit the application if the connection fails
   });
 
-module.exports = { pool: poolPromise };
+module.exports = { pool };

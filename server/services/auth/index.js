@@ -33,7 +33,7 @@ router.post("/login", async (req, res) => {
     }
 
     // Check if email exists
-    const user = await db.collection("users").findOne({ email });
+    const user = await db.collection("manager").findOne({ email });
 
     if (!user) {
       return res
@@ -57,7 +57,7 @@ router.post("/login", async (req, res) => {
     // Generate a token using the existing generateToken function
     const token = await generateToken({
       email: user.email,
-      userId: user.userId, // Assuming the user ID is stored in the user record
+      managerId: user.managerId, // Assuming the user ID is stored in the user record
       roleId: roleId,
     });
 
@@ -75,10 +75,19 @@ router.post("/register", async (req, res) => {
     // Connect to MongoDB
     db = await connectToMongoDB();
 
-    const { fullname, email, password, cpassword, roleId } = req.body;
+    const { fullname, email, password, cpassword, roleId, phone, address } =
+      req.body;
 
     // Check if all fields are present
-    if (!fullname || !email || !password || !cpassword || !roleId) {
+    if (
+      !fullname ||
+      !email ||
+      !password ||
+      !cpassword ||
+      !roleId ||
+      !phone ||
+      !address
+    ) {
       return res
         .status(400)
         .json({ success: false, error: "All fields are required" });
@@ -93,7 +102,7 @@ router.post("/register", async (req, res) => {
     }
 
     // Check if email already exists
-    const existingUser = await db.collection("users").findOne({ email });
+    const existingUser = await db.collection("manager").findOne({ email });
 
     if (existingUser) {
       return res
@@ -111,10 +120,12 @@ router.post("/register", async (req, res) => {
       email,
       password: hashedPassword,
       roleId,
+      phone,
+      address,
       createdAt: new Date(), // Use the current date and time
     };
 
-    await db.collection("users").insertOne(newUser);
+    await db.collection("manager").insertOne(newUser);
 
     res
       .status(201)
@@ -140,7 +151,7 @@ router.post("/forgot_password", async (req, res) => {
     db = await connectToMongoDB();
 
     // Check if email exists
-    const foundUser = await db.collection("users").findOne({ email });
+    const foundUser = await db.collection("manager").findOne({ email });
 
     if (!foundUser) {
       return res
@@ -228,7 +239,7 @@ router.post("/reset_password/:token/:email", async (req, res) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    await db.collection("users").updateOne(
+    await db.collection("manager").updateOne(
       { email },
       {
         $set: {
@@ -280,7 +291,7 @@ router.put("/update_password", async (req, res) => {
     }
 
     // Check if the email exists in the database
-    const user = await db.collection("users").findOne({ email });
+    const user = await db.collection("manager").findOne({ email });
 
     if (!user) {
       return res
@@ -293,7 +304,7 @@ router.put("/update_password", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Update the user's password in the database
-    await db.collection("users").updateOne(
+    await db.collection("manager").updateOne(
       { email },
       {
         $set: {
@@ -313,6 +324,7 @@ router.put("/update_password", async (req, res) => {
   }
   // No need to close the connection here; it should remain open for future requests
 });
+
 router.get("/users", async (req, res) => {
   let db;
   try {
@@ -321,7 +333,7 @@ router.get("/users", async (req, res) => {
 
     // Retrieve users with their roles
     const users = await db
-      .collection("users")
+      .collection("manager")
       .aggregate([
         {
           $lookup: {
@@ -341,7 +353,7 @@ router.get("/users", async (req, res) => {
         {
           $project: {
             // Specify the fields to include in the output
-            userId: "$userId",
+            managerId: "$managerId",
             fullname: "$fullname",
             email: "$email",
             phone: "$phone",
@@ -376,7 +388,7 @@ router.get("/users/:email", async (req, res) => {
     db = await connectToMongoDB();
 
     // Find the user by email
-    const user = await db.collection("users").findOne({ email });
+    const user = await db.collection("manager").findOne({ email });
 
     if (user) {
       return res.status(200).json({ success: true, data: user });
@@ -392,12 +404,12 @@ router.get("/users/:email", async (req, res) => {
   // No need to close the connection here; it should remain open for future requests
 });
 
-router.put("/update_user/:userId", async (req, res) => {
-  const userId = req.params.userId; // Assuming userId is a string in MongoDB
-  const { fullname, email, roleId } = req.body;
+router.put("/update_user/:managerId", async (req, res) => {
+  const managerId = req.params.managerId; // Assuming managerId is a string in MongoDB
+  const { fullname, email, roleId, phone, address } = req.body;
 
   // Check if at least one field is present
-  if (!fullname && !email && !roleId) {
+  if (!fullname && !email && !roleId && !phone && !address) {
     return res.status(400).json({
       success: false,
       error: "At least one field is required to update",
@@ -411,9 +423,9 @@ router.put("/update_user/:userId", async (req, res) => {
 
     // Check if email already exists for another user
     if (email) {
-      const existingUser = await db.collection("users").findOne({
+      const existingUser = await db.collection("manager").findOne({
         email: email,
-        userId: { $ne: userId }, // Ensure that the userId is not the same
+        managerId: { $ne: managerId }, // Ensure that the userId is not the same
       });
 
       if (existingUser) {
@@ -428,10 +440,12 @@ router.put("/update_user/:userId", async (req, res) => {
     if (fullname) updateFields.fullname = fullname;
     if (email) updateFields.email = email;
     if (roleId) updateFields.roleId = roleId;
+    if (phone) updateFields.phone = phone;
+    if (address) updateFields.address = address;
 
     // Execute the update query
-    const result = await db.collection("users").updateOne(
-      { userId: userId }, // Filter by userId
+    const result = await db.collection("manager").updateOne(
+      { managerId: managerId }, // Filter by userId
       { $set: updateFields } // Update the fields
     );
 
@@ -467,7 +481,9 @@ router.put("/update_profile", async (req, res) => {
     db = await connectToMongoDB();
 
     // Check if the current email exists in the database
-    const user = await db.collection("users").findOne({ email: currentEmail });
+    const user = await db
+      .collection("manager")
+      .findOne({ email: currentEmail });
 
     if (!user) {
       return res
@@ -480,7 +496,7 @@ router.put("/update_profile", async (req, res) => {
     if (fullname) updateFields.fullname = fullname;
     if (newEmail) {
       // Check if the new email is already in use
-      const existingUser = await db.collection("users").findOne({
+      const existingUser = await db.collection("manager").findOne({
         email: newEmail,
         email: { $ne: currentEmail }, // Ensure the new email is not the current email
       });
@@ -502,7 +518,7 @@ router.put("/update_profile", async (req, res) => {
     }
 
     // Execute the update query
-    await db.collection("users").updateOne(
+    await db.collection("manager").updateOne(
       { email: currentEmail }, // Filter by current email
       { $set: updateFields } // Update the fields
     );
@@ -539,7 +555,9 @@ router.post("/create_user", async (req, res) => {
     }
 
     // Check if email already exists
-    const existingUser = await db.collection("users").findOne({ email: email });
+    const existingUser = await db
+      .collection("manager")
+      .findOne({ email: email });
 
     if (existingUser) {
       return res
@@ -557,7 +575,7 @@ router.post("/create_user", async (req, res) => {
       createdAt: new Date(), // Use the current date
     };
 
-    await db.collection("users").insertOne(newUser);
+    await db.collection("manager").insertOne(newUser);
 
     res
       .status(201)
@@ -569,9 +587,10 @@ router.post("/create_user", async (req, res) => {
   // No need to close the connection here; it should remain open for future requests
 });
 
-router.put("/update_user/:userId", async (req, res) => {
+router.put("/update_user/:managerId", async (req, res) => {
+  const managerId = parseInt(req.params.managerId);
   try {
-    const userId = req.params.userId; // Assuming userId is a string or ObjectId in MongoDB
+    // Assuming userId is a string or ObjectId in MongoDB
     const { fullname, email, address, phone, roleId } = req.body;
 
     // Prepare the update object
@@ -593,8 +612,8 @@ router.put("/update_user/:userId", async (req, res) => {
     const db = await connectToMongoDB();
 
     // Execute the update query
-    const result = await db.collection("users").updateOne(
-      { userId: userId }, // Filter by userId
+    const result = await db.collection("manager").updateOne(
+      { managerId: managerId }, // Filter by userId
       { $set: { ...updateFields, updatedAt: new Date() } } // Update the fields
     );
 
@@ -611,15 +630,17 @@ router.put("/update_user/:userId", async (req, res) => {
   }
 });
 
-router.get("/editing/:userId", async (req, res) => {
-  const userId = req.params.userId; // Extract userId from the request parameters
+router.get("/editing/:managerId", async (req, res) => {
+  const managerId = parseInt(req.params.managerId); // Extract managerId from the request parameters
 
   try {
     // Connect to MongoDB
     const db = await connectToMongoDB();
 
-    // Fetch the user by userId
-    const user = await db.collection("users").findOne({ userId: userId });
+    // Fetch the user by managerId
+    const user = await db
+      .collection("manager")
+      .findOne({ managerId: managerId });
 
     if (user) {
       // Assuming roles are stored in a separate collection
@@ -629,7 +650,7 @@ router.get("/editing/:userId", async (req, res) => {
 
       // Construct the response data
       const responseData = {
-        userId: user.userId,
+        managerId: user.managerId,
         fullname: user.fullname,
         address: user.address,
         email: user.email,
@@ -647,15 +668,17 @@ router.get("/editing/:userId", async (req, res) => {
   }
 });
 
-router.delete("/editing/:userId", async (req, res) => {
-  const userId = req.params.userId; // Extract userId from the request parameters
+router.delete("/editing/:managerId", async (req, res) => {
+  const managerId = parseInt(req.params.managerId); // Extract managerId from the request parameters
 
   try {
     // Connect to MongoDB
     const db = await connectToMongoDB();
 
     // Execute the delete operation
-    const result = await db.collection("users").deleteOne({ userId: userId });
+    const result = await db
+      .collection("manager")
+      .deleteOne({ managerId: managerId });
 
     // Check if any documents were deleted
     if (result.deletedCount > 0) {

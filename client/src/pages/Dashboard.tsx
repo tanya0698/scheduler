@@ -75,7 +75,7 @@ const Dashboard = () => {
 
     const currentCount = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/current/count');
+            const response = await axios.get('http://localhost:4002/api/completed/count');
             console.log('Current Appointment Count:', response.data);
 
             if (response.data.success === true) {
@@ -303,7 +303,7 @@ const Dashboard = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-6 text-white">
                     <div className="panel bg-gradient-to-r from-cyan-500 to-cyan-400" onClick={handleRedirect}>
                         <div className="flex justify-between">
-                            <div className="ltr:mr-1 rtl:ml-1 text-md font-semibold">Current Appointments</div>
+                            <div className="ltr:mr-1 rtl:ml-1 text-md font-semibold">Completed Appointments</div>
                             <div className="dropdown">
                                 <Dropdown
                                     offset={[0, 5]}

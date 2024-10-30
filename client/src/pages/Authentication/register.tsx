@@ -19,8 +19,10 @@ const RegisterCover = () => {
     const dispatch = useDispatch();
     const [fullname, setFullname] = useState('');
     const [email, setEmail] = useState('');
-    const [roles, setRoles] = useState<{ roleId: string; roleName: string }[]>([]);
-    const [roleId, setRoleId] = useState<number | null>(null);
+    const [address, setAddress] = useState('');
+    const [phone, setPhone] = useState('');
+    const [roles, setRoles] = useState<{ roleId: number; roleName: string }[]>([]);
+    const [roleId, setRoleId] = useState<number | ''>('');
     const [password, setPassword] = useState('');
     const [cpassword, setCpassword] = useState('');
     const [error, setError] = useState('');
@@ -44,7 +46,7 @@ const RegisterCover = () => {
 
     const fetchRoles = async () => {
         try {
-            const response = await axios.get('https://server-side-5zbf.onrender.com/api/roles');
+            const response = await axios.get('http://localhost:4002/api/roles');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -65,9 +67,11 @@ const RegisterCover = () => {
         e.preventDefault();
 
         try {
-            const response = await axios.post('https://server-side-5zbf.onrender.com/api/register', {
+            const response = await axios.post('http://localhost:4002/api/register', {
                 fullname,
                 email,
+                phone,
+                address,
                 roleId,
                 password,
                 cpassword,
@@ -137,16 +141,45 @@ const RegisterCover = () => {
                                     </div>
                                 </div>
                                 <div>
+                                    <label htmlFor="Address">Address</label>
+                                    <div className="relative text-white-dark">
+                                        <input
+                                            id="Address"
+                                            type="address"
+                                            placeholder="Enter Address"
+                                            className="form-input ps-10 placeholder:text-white-dark"
+                                            value={address}
+                                            onChange={(e) => setAddress(e.target.value)}
+                                        />
+                                        <span className="absolute start-4 top-1/2 -translate-y-1/2">
+                                            <IconMail fill={true} />
+                                        </span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label htmlFor="Phone">Phone</label>
+                                    <div className="relative text-white-dark">
+                                        <input
+                                            id="Phone"
+                                            type="phone"
+                                            placeholder="Enter Phone Number"
+                                            className="form-input ps-10 placeholder:text-white-dark"
+                                            value={phone}
+                                            onChange={(e) => setPhone(e.target.value)}
+                                        />
+                                        <span className="absolute start-4 top-1/2 -translate-y-1/2">
+                                            <IconMail fill={true} />
+                                        </span>
+                                    </div>
+                                </div>
+                                <div>
                                     <label htmlFor="Role">Select Role</label>
                                     <div className="relative text-white-dark">
                                         <select
                                             id="Role"
                                             className="form-input ps-10 placeholder:text-white-dark"
-                                            value={roleId !== null ? roleId : ''} // Ensure value is a string or empty
-                                            onChange={(e) => {
-                                                const selectedValue = e.target.value;
-                                                setRoleId(selectedValue ? Number(selectedValue) : null); // Convert to number or set to null
-                                            }}
+                                            value={roleId}
+                                            onChange={(e) => setRoleId(Number(e.target.value))} // Convert value to number
                                         >
                                             <option value="" disabled>
                                                 Select Role

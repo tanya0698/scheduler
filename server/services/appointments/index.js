@@ -2,6 +2,7 @@
 const express = require("express");
 const { connectToMongoDB } = require("../../dbconfig");
 const router = express.Router();
+const { startOfDay, endOfDay } = require("date-fns"); // Make sure to install date-fns
 
 router.post("/create_appointment", async (req, res) => {
   try {
@@ -58,8 +59,8 @@ router.post("/create_appointment", async (req, res) => {
 });
 
 router.put("/update_appointment/:appointmentId", async (req, res) => {
+  const appointmentId = parseInt(req.params.appointmentId);
   try {
-    const appointmentId = req.params.appointmentId; // Assuming appointmentId is a string or ObjectId
     const {
       appointmentName,
       appointmentDescription,
@@ -119,52 +120,46 @@ router.get("/appointments", async (req, res) => {
     // Connect to MongoDB
     const db = await connectToMongoDB();
 
-    // Use the aggregate method to join collections
+    // Find the top 5 appointments, joining with events and status collections
     const appointments = await db
       .collection("appointments")
       .aggregate([
         {
           $lookup: {
-            from: "events", // The events collection
-            localField: "eventId", // Field from appointments
-            foreignField: "_id", // Field from events (assuming _id is the foreign key)
-            as: "eventDetails", // Output array field
+            from: "events",
+            localField: "eventId",
+            foreignField: "eventId",
+            as: "eventDetails",
           },
         },
         {
           $lookup: {
-            from: "status", // The status collection
-            localField: "statusId", // Field from appointments
-            foreignField: "_id", // Field from status (assuming _id is the foreign key)
-            as: "statusDetails", // Output array field
+            from: "status",
+            localField: "statusId",
+            foreignField: "statusId",
+            as: "statusDetails",
           },
         },
         {
-          $unwind: {
-            path: "$eventDetails", // Unwind the eventDetails array
-            preserveNullAndEmptyArrays: true, // Keep appointments without event details
-          },
+          $unwind: "$eventDetails",
         },
         {
-          $unwind: {
-            path: "$statusDetails", // Unwind the statusDetails array
-            preserveNullAndEmptyArrays: true, // Keep appointments without status details
-          },
+          $unwind: "$statusDetails",
         },
         {
           $project: {
-            appointmentId: 1,
-            appointmentName: 1,
-            appointmentDescription: 1,
-            appointmentLocation: 1,
-            appointmentFrom: 1,
-            appointmentTo: 1,
-            event: "$eventDetails.eventName", // Select the event name
-            status: "$statusDetails.statusName", // Select the status name
+            appointmentId: "$appointmentId",
+            appointmentName: "$appointmentName",
+            appointmentDescription: "$appointmentDescription",
+            appointmentLocation: "$appointmentLocation",
+            appointmentFrom: "$appointmentFrom",
+            appointmentTo: "$appointmentTo",
+            event: "$eventDetails.eventName",
+            status: "$statusDetails.statusName",
           },
         },
       ])
-      .toArray(); // Convert the cursor to an array
+      .toArray();
 
     res.status(200).json({ success: true, data: appointments });
   } catch (ex) {
@@ -174,66 +169,65 @@ router.get("/appointments", async (req, res) => {
 });
 
 router.get("/appointments/:appointmentId", async (req, res) => {
-  const appointmentId = req.params.appointmentId; // Extract appointmentId from the request parameters
-  console.log("Received appointmentId:", appointmentId); // Debug log
+  const appointmentId = parseInt(req.params.appointmentId);
 
   try {
     // Connect to MongoDB
     const db = await connectToMongoDB();
 
-    // Find the appointment by appointmentId
-    const appointment = await db
+    // Use the aggregate method to join collections based on appointmentId
+    const appointmentDetails = await db
       .collection("appointments")
       .aggregate([
         {
-          $match: { appointmentId: appointmentId }, // Match by appointmentId
-        },
-        {
-          $lookup: {
-            from: "events", // The events collection
-            localField: "eventId", // Field from appointments
-            foreignField: "eventId", // Field from events
-            as: "eventDetails", // Output array field
+          $match: {
+            appointmentId: appointmentId, // Match the appointmentId from the URL
           },
         },
         {
           $lookup: {
-            from: "status", // The status collection
-            localField: "statusId", // Field from appointments
-            foreignField: "statusId", // Field from status
-            as: "statusDetails", // Output array field
+            from: "events",
+            localField: "eventId",
+            foreignField: "eventId",
+            as: "eventDetails",
           },
         },
         {
-          $unwind: "$eventDetails", // Unwind the eventDetails array
+          $lookup: {
+            from: "status",
+            localField: "statusId",
+            foreignField: "statusId",
+            as: "statusDetails",
+          },
         },
         {
-          $unwind: "$statusDetails", // Unwind the statusDetails array
+          $unwind: "$eventDetails",
+        },
+        {
+          $unwind: "$statusDetails",
         },
         {
           $project: {
-            appointmentId: 1,
-            appointmentName: 1,
-            appointmentDescription: 1,
-            appointmentLocation: 1,
-            appointmentFrom: 1,
-            appointmentTo: 1,
-            event: "$eventDetails.eventName", // Select the event name
-            status: "$statusDetails.statusName", // Select the status name
+            appointmentId: "$appointmentId",
+            appointmentName: "$appointmentName",
+            appointmentDescription: "$appointmentDescription",
+            appointmentLocation: "$appointmentLocation",
+            appointmentFrom: "$appointmentFrom",
+            appointmentTo: "$appointmentTo",
+            event: "$eventDetails.eventName",
+            status: "$statusDetails.statusName",
           },
         },
       ])
       .toArray(); // Convert the cursor to an array
 
-    console.log("Fetched appointment:", appointment); // Debug log
-
-    if (appointment.length > 0) {
-      res.status(200).json({ success: true, data: appointment[0] });
-    } else {
-      res
+    if (appointmentDetails.length === 0) {
+      return res
         .status(404)
         .json({ success: false, message: "Appointment not found" });
     }
+
+    res.status(200).json({ success: true, data: appointmentDetails[0] }); // Return the first appointment detail
   } catch (ex) {
     console.error("Database query error:", ex); // Log the error for debugging
     res.status(500).json({ success: false, error: ex.message });
@@ -241,7 +235,7 @@ router.get("/appointments/:appointmentId", async (req, res) => {
 });
 
 router.delete("/appointments/:appointmentId", async (req, res) => {
-  const appointmentId = req.params.appointmentId; // Extract appointmentId from the request parameters
+  const appointmentId = parseInt(req.params.appointmentId);
 
   try {
     // Connect to MongoDB
@@ -267,63 +261,64 @@ router.delete("/appointments/:appointmentId", async (req, res) => {
     res.status(500).json({ success: false, error: ex.message });
   }
 });
+
 router.get("/current", async (req, res) => {
   try {
     // Connect to MongoDB
     const db = await connectToMongoDB();
 
-    // Get the current date
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0); // Set to midnight to compare only the date part
+    // Get the start and end of the current day as timestamps
+    const startOfCurrentDay = startOfDay(new Date()).getTime(); // Convert to milliseconds
+    const endOfCurrentDay = endOfDay(new Date()).getTime(); // Convert to milliseconds
 
-    // Use the aggregate method to join collections and filter by current date
+    // Find today's appointments, joining with events and status collections
     const appointments = await db
       .collection("appointments")
       .aggregate([
         {
           $match: {
             appointmentFrom: {
-              $gte: currentDate,
-              $lt: new Date(currentDate.getTime() + 24 * 60 * 60 * 1000), // Next day
+              $gte: new Date(startOfCurrentDay), // Convert back to Date object
+              $lte: new Date(endOfCurrentDay), // Convert back to Date object
             },
           },
         },
         {
           $lookup: {
-            from: "events", // The events collection
-            localField: "eventId", // Field from appointments
-            foreignField: "eventId", // Field from events
-            as: "eventDetails", // Output array field
+            from: "events",
+            localField: "eventId",
+            foreignField: "eventId",
+            as: "eventDetails",
           },
         },
         {
           $lookup: {
-            from: "status", // The status collection
-            localField: "statusId", // Field from appointments
-            foreignField: "statusId", // Field from status
-            as: "statusDetails", // Output array field
+            from: "status",
+            localField: "statusId",
+            foreignField: "statusId",
+            as: "statusDetails",
           },
         },
         {
-          $unwind: "$eventDetails", // Unwind the eventDetails array
+          $unwind: "$eventDetails",
         },
         {
-          $unwind: "$statusDetails", // Unwind the statusDetails array
+          $unwind: "$statusDetails",
         },
         {
           $project: {
-            appointmentId: 1,
-            appointmentName: 1,
-            appointmentDescription: 1,
-            appointmentLocation: 1,
-            appointmentFrom: 1,
-            appointmentTo: 1,
-            event: "$eventDetails.eventName", // Select the event name
-            status: "$statusDetails.statusName", // Select the status name
+            appointmentId: "$appointmentId",
+            appointmentName: "$appointmentName",
+            appointmentDescription: "$appointmentDescription",
+            appointmentLocation: "$appointmentLocation",
+            appointmentFrom: "$appointmentFrom",
+            appointmentTo: "$appointmentTo",
+            event: "$eventDetails.eventName",
+            status: "$statusDetails.statusName",
           },
         },
       ])
-      .toArray(); // Convert the cursor to an array
+      .toArray();
 
     res.status(200).json({ success: true, data: appointments });
   } catch (ex) {

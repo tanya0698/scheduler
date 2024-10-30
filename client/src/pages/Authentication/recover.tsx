@@ -34,7 +34,7 @@ const RecoverIdCover = () => {
     const submitForm = async (e: { preventDefault: () => void }) => {
         e.preventDefault();
         try {
-            const response = await axios.post('https://server-side-5zbf.onrender.com/api/forgot_password', { email });
+            const response = await axios.post('http://localhost:4002/api/forgot_password', { email });
             setSuccess('Email sent successfully!');
             setError('Email not found.');
         } catch (error) {

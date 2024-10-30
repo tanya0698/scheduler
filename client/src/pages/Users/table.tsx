@@ -40,12 +40,12 @@ const UsersTable = () => {
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [address, setAddress] = useState('');
-    const [roles, setRoles] = useState<{ roleId: string; roleName: string }[]>([]);
-    const [roleId, setRoleId] = useState<string | ''>('');
+    const [roles, setRoles] = useState<{ roleId: number; roleName: string }[]>([]);
+    const [roleId, setRoleId] = useState<number | ''>('');
 
     const fetchRoles = async () => {
         try {
-            const response = await axios.get('https://server-side-5zbf.onrender.com/api/roles');
+            const response = await axios.get('http://localhost:4002/api/roles');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -64,7 +64,7 @@ const UsersTable = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get('https://server-side-5zbf.onrender.com/api/users');
+            const response = await axios.get('http://localhost:4002/api/users');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -85,19 +85,20 @@ const UsersTable = () => {
         fetchUsers();
     }, []);
 
-    const fetchUserDetails = async (userId: any) => {
+    const fetchUserDetails = async (managerId: any) => {
         try {
-            const response = await axios.get(`https://server-side-5zbf.onrender.com/api/editing/${userId}`);
+            const response = await axios.get(`http://localhost:4002/api/editing/${managerId}`);
             console.log('User Details:', response.data);
 
             if (response.data.success) {
                 const user = response.data.data; // This is a single user object
                 // Format the user object
                 const formattedEvent = {
-                    id: user.userId,
+                    id: user.managerId,
                     title: user.fullname,
                     email: user.email,
                     phone: user.phone,
+                    location: user.address,
                     type: user.role,
                 };
 
@@ -132,7 +133,6 @@ const UsersTable = () => {
         setInitialRecords(() => {
             return initialRecords.filter((item: any) => {
                 return (
-                    item.userId.toString().includes(search.toLowerCase()) ||
                     item.fullname.toLowerCase().includes(search.toLowerCase()) ||
                     item.email.toLowerCase().includes(search.toLowerCase()) ||
                     item.phone.toLowerCase().includes(search.toLowerCase()) ||
@@ -203,7 +203,7 @@ const UsersTable = () => {
                 roleId,
             });
 
-            const response = await axios.post('https://server-side-5zbf.onrender.com/api/register', {
+            const response = await axios.post('http://localhost:4002/api/create_user', {
                 fullname,
                 phone,
                 email,
@@ -243,7 +243,7 @@ const UsersTable = () => {
 
         try {
             // Send the PUT request with the updated appointment details
-            const response = await axios.put(`https://server-side-5zbf.onrender.com/api/update_user/${selectedUser.id}`, updatedUserData);
+            const response = await axios.put(`http://localhost:4002/api/update_user/${selectedUser.id}`, updatedUserData);
 
             if (response.data.success) {
                 console.log('User updated successfully:', response.data.message);
@@ -262,14 +262,14 @@ const UsersTable = () => {
         }
     };
 
-    const handleEdit = async (userId: string) => {
-        await fetchUserDetails(userId); // Fetch appointment details
+    const handleEdit = async (managerId: string) => {
+        await fetchUserDetails(managerId); // Fetch appointment details
         setModalEdit(true); // Show the modal
     };
 
-    const deleteUser = async (userId: string) => {
+    const deleteUser = async (managerId: string) => {
         try {
-            const response = await axios.delete(`https://server-side-5zbf.onrender.com/api/editing/${userId}`);
+            const response = await axios.delete(`http://localhost:4002/api/editing/${managerId}`);
             console.log('Delete Response:', response.data);
 
             if (response.data.success) {
@@ -285,10 +285,10 @@ const UsersTable = () => {
     };
 
     // Example usage of deleteAppointment function
-    const handleDelete = async (userId: string) => {
+    const handleDelete = async (managerId: string) => {
         const confirmDelete = window.confirm('Are you sure you want to delete this user?');
         if (confirmDelete) {
-            await deleteUser(userId);
+            await deleteUser(managerId);
         }
     };
 
@@ -321,7 +321,7 @@ const UsersTable = () => {
                         className="whitespace-nowrap table-hover"
                         records={recordsData}
                         columns={[
-                            { accessor: 'userId', title: 'Number', sortable: true },
+                            { accessor: 'managerId', title: 'Number', sortable: true },
                             { accessor: 'fullname', title: 'Name', sortable: true },
                             { accessor: 'email', title: 'Email', sortable: true },
                             { accessor: 'phone', title: 'Phone', sortable: true },
@@ -336,14 +336,14 @@ const UsersTable = () => {
                                         <ul className="flex items-center justify-center gap-2">
                                             <li>
                                                 <Tippy content="Edit">
-                                                    <button type="button" onClick={() => handleEdit(row.userId)}>
+                                                    <button type="button" onClick={() => handleEdit(row.managerId)}>
                                                         <IconPencil className="text-success" />
                                                     </button>
                                                 </Tippy>
                                             </li>
                                             <li>
                                                 <Tippy content="Delete">
-                                                    <button type="button" onClick={() => handleDelete(row.userId)}>
+                                                    <button type="button" onClick={() => handleDelete(row.managerId)}>
                                                         <IconTrashLines className="text-danger" />
                                                     </button>
                                                 </Tippy>
@@ -469,7 +469,7 @@ const UsersTable = () => {
                                                         id="Type"
                                                         className="form-input ps-10 placeholder:text-white-dark"
                                                         value={roleId}
-                                                        onChange={(e) => setRoleId(e.target.value)} // Convert value to number
+                                                        onChange={(e) => setRoleId(Number(e.target.value))} // Convert value to number
                                                     >
                                                         <option value="" disabled>
                                                             Select Role
@@ -610,7 +610,7 @@ const UsersTable = () => {
                                                         id="type"
                                                         className="form-input ps-10 placeholder:text-white-dark"
                                                         value={selectedUser?.type || ''} // Use selectedEvent eventId
-                                                        onChange={(e) => setSelectedUser({ ...selectedUser, type: e.target.value })}
+                                                        onChange={(e) => setSelectedUser({ ...selectedUser, type: Number(e.target.value) })}
                                                     >
                                                         <option value="" disabled>
                                                             Select Role

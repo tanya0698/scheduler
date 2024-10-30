@@ -68,6 +68,12 @@
                 },
                 "roleId": {
                   "example": "any"
+                },
+                "phone": {
+                  "example": "any"
+                },
+                "address": {
+                  "example": "any"
                 }
               }
             }
@@ -243,12 +249,12 @@
         }
       }
     },
-    "/update_user/{userId}": {
+    "/update_user/{managerId}": {
       "put": {
         "description": "",
         "parameters": [
           {
-            "name": "userId",
+            "name": "managerId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -372,12 +378,12 @@
         }
       }
     },
-    "/editing/{userId}": {
+    "/editing/{managerId}": {
       "get": {
         "description": "",
         "parameters": [
           {
-            "name": "userId",
+            "name": "managerId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -399,7 +405,7 @@
         "description": "",
         "parameters": [
           {
-            "name": "userId",
+            "name": "managerId",
             "in": "path",
             "required": true,
             "type": "string"

@@ -43,7 +43,7 @@ const UpdateCover = () => {
         const email = new URLSearchParams(window.location.search).get('email');
 
         try {
-            const response = await axios.post(`https://server-side-5zbf.onrender.com/api/reset_password/${token}/${email}`, {
+            const response = await axios.post(`http://localhost:4002/api/reset_password/${token}/${email}`, {
                 password,
                 cpassword,
             });

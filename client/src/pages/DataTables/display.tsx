@@ -42,7 +42,7 @@ const Tables = () => {
 
     const fetchAppointments = async () => {
         try {
-            const response = await axios.get('https://server-side-5zbf.onrender.com/api/current');
+            const response = await axios.get('http://localhost:4002/api/current');
             console.log('Current Appointment Details:', response.data);
 
             if (response.data.success === true) {

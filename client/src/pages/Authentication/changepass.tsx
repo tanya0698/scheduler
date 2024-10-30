@@ -62,7 +62,7 @@ const ChangeCover = () => {
         setError('');
 
         axios
-            .post('https://server-side-5zbf.onrender.com/api/update_password', {
+            .post('http://localhost:4002/api/update_password', {
                 password,
                 cpassword,
             })

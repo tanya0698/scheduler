@@ -16,7 +16,6 @@ const AccountSetting = () => {
         email: '',
         phone: '',
         address: '',
-        country: '',
     });
 
     const fetchUser = async () => {
@@ -27,15 +26,14 @@ const AccountSetting = () => {
         }
 
         try {
-            const response = await axios.get(`https://server-side-5zbf.onrender.com/api/users/${currentEmail}`);
+            const response = await axios.get(`http://localhost:4002/api/users/${currentEmail}`);
             if (response.data.success) {
                 const userData = response.data.data;
                 setUser({
                     fullname: userData.fullname,
                     email: userData.email,
-                    country: '', // Initialize other fields as needed
-                    address: '',
-                    phone: '',
+                    address: userData.address,
+                    phone: userData.phone,
                 });
             } else {
                 console.error('Failed to fetch user data:', response.data.message);
@@ -61,7 +59,7 @@ const AccountSetting = () => {
     const handleSubmit = async (e: { preventDefault: () => void }) => {
         e.preventDefault();
         try {
-            await axios.post('https://server-side-5zbf.onrender.com/api/update_profile', userData);
+            await axios.post('http://localhost:4002/api/update_profile', userData);
             alert('User  data updated successfully!');
         } catch (error) {
             console.error('Error updating user data:', error);
@@ -110,10 +108,6 @@ const AccountSetting = () => {
                                     <div>
                                         <label htmlFor="name">Full Name</label>
                                         <input id="fullname" type="text" placeholder="First User" className="form-input" value={userData.fullname} onChange={handleChange} />
-                                    </div>
-                                    <div>
-                                        <label htmlFor="address">Country</label>
-                                        <input id="country" type="text" placeholder="Zimbabwe" className="form-input" value={userData.country} onChange={handleChange} />
                                     </div>
                                     <div>
                                         <label htmlFor="address">Address</label>

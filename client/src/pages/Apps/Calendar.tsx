@@ -21,10 +21,10 @@ const Calendar = () => {
 
     const [appointmentName, setAppointmentName] = useState('');
     const [appointmentLocation, setAppointmentLocation] = useState('');
-    const [events, setEvents] = useState<{ eventId: string; eventName: string }[]>([]);
-    const [eventId, setEventId] = useState<string | ''>('');
-    const [status, setStatus] = useState<{ statusId: string; statusName: string }[]>([]);
-    const [statusId, setStatusId] = useState<string | ''>('');
+    const [events, setEvents] = useState<{ eventId: number; eventName: string }[]>([]);
+    const [eventId, setEventId] = useState<number | ''>('');
+    const [status, setStatus] = useState<{ statusId: number; statusName: string }[]>([]);
+    const [statusId, setStatusId] = useState<number | ''>('');
     const [appointmentDescription, setAppointmentDescription] = useState('');
     const [appointmentFrom, setAppointmentFrom] = useState('');
     const [appointmentTo, setAppointmentTo] = useState('');
@@ -38,7 +38,7 @@ const Calendar = () => {
 
     const fetchEvents = async () => {
         try {
-            const response = await axios.get('https://server-side-5zbf.onrender.com/api/events');
+            const response = await axios.get('http://localhost:4002/api/events');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -57,7 +57,7 @@ const Calendar = () => {
 
     const fetchStatus = async () => {
         try {
-            const response = await axios.get('https://server-side-5zbf.onrender.com/api/status');
+            const response = await axios.get('http://localhost:4002/api/status');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -115,7 +115,7 @@ const Calendar = () => {
 
     const fetchEvents2 = async () => {
         try {
-            const response = await axios.get('https://server-side-5zbf.onrender.com/api/appointments');
+            const response = await axios.get('http://localhost:4002/api/appointments');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -156,7 +156,7 @@ const Calendar = () => {
                 console.log('Fetched appointments:', formattedEvents);
             }
         } catch (error) {
-            console.error('Error fetching appointments', error);
+            console.error('Error fetching appointments to render on calender', error);
         }
     };
 
@@ -166,7 +166,7 @@ const Calendar = () => {
 
     const fetchAppointmentDetails = async (appointmentId: string) => {
         try {
-            const response = await axios.get(`https://server-side-5zbf.onrender.com/api/appointments/${appointmentId}`);
+            const response = await axios.get(`http://localhost:4002/api/appointments/${appointmentId}`);
             console.log('Appointment Details:', response.data);
 
             if (response.data.success) {
@@ -195,7 +195,7 @@ const Calendar = () => {
                 console.error('Failed to fetch appointment details:', response.data.message);
             }
         } catch (error) {
-            console.error('Error fetching appointment details:', error);
+            console.error('Error fetching appointment details to be updated:', error);
         }
     };
 
@@ -225,7 +225,7 @@ const Calendar = () => {
                 statusId,
             });
 
-            const response = await axios.post('https://server-side-5zbf.onrender.com/api/create_appointment', {
+            const response = await axios.post('http://localhost:4002/api/create_appointment', {
                 appointmentName,
                 appointmentLocation,
                 appointmentFrom: formattedFrom,
@@ -269,13 +269,14 @@ const Calendar = () => {
 
         try {
             // Send the PUT request with the updated appointment details
-            const response = await axios.put(`https://server-side-5zbf.onrender.com/api/update_appointment/${selectedEvent.id}`, updatedAppointmentData);
+            const response = await axios.put(`http://localhost:4002/api/update_appointment/${selectedEvent.id}`, updatedAppointmentData);
 
             if (response.data.success) {
                 console.log('Appointment updated successfully:', response.data.message);
                 // Optionally, you can close the modal or reset the form here
                 showMessage('Appointment has been updated successfully.');
                 setModalEdit(false);
+                window.location.reload();
                 // You may also want to refetch the appointment details or update the state
             } else {
                 showMessage('Failed to update appointment:', response.data.message);
@@ -434,29 +435,28 @@ const Calendar = () => {
                                                 ></textarea>
                                             </div>
                                             <div>
-                                                <label htmlFor="Type">Select Appointment Type</label>
-                                                <div className="relative text-white-dark">
-                                                    <select
-                                                        id="Type"
-                                                        className="form-input ps-10 placeholder:text-white-dark"
-                                                        value={eventId}
-                                                        onChange={(e) => setEventId(e.target.value)} // Convert value to number
-                                                    >
-                                                        <option value="" disabled>
-                                                            Select Type
-                                                        </option>
-                                                        {events.length > 0 ? (
-                                                            events.map((event) => (
-                                                                <option key={event.eventId} value={event.eventId}>
-                                                                    {event.eventName}
-                                                                </option>
-                                                            ))
-                                                        ) : (
-                                                            <option value="" disabled>
-                                                                No types available
-                                                            </option>
-                                                        )}
-                                                    </select>
+                                                <label>Select Appointment Type:</label>
+                                                <div className="mt-3">
+                                                    {events.length > 0 ? (
+                                                        events.map((event) => (
+                                                            <label
+                                                                key={event.eventId}
+                                                                className={`inline-flex cursor-pointer ltr:mr-3 rtl:ml-3 ${event.eventId === eventId ? 'bg-primary-500 text-info' : 'bg-success-200'}`}
+                                                            >
+                                                                <input
+                                                                    type="radio"
+                                                                    className="form-radio"
+                                                                    name="eventType"
+                                                                    value={event.eventId}
+                                                                    checked={eventId === event.eventId}
+                                                                    onChange={(e) => setEventId(Number(e.target.value))}
+                                                                />
+                                                                <span className="ltr:pl-2 rtl:pr-2">{event.eventName}</span>
+                                                            </label>
+                                                        ))
+                                                    ) : (
+                                                        <span>No types available</span>
+                                                    )}
                                                 </div>
                                             </div>
                                             <div>
@@ -466,7 +466,7 @@ const Calendar = () => {
                                                         id="Status"
                                                         className="form-input ps-10 placeholder:text-white-dark"
                                                         value={statusId}
-                                                        onChange={(e) => setStatusId(e.target.value)} // Convert value to number
+                                                        onChange={(e) => setStatusId(Number(e.target.value))} // Convert value to number
                                                     >
                                                         <option value="" disabled>
                                                             Select Status
@@ -619,7 +619,7 @@ const Calendar = () => {
                                                         id="Event"
                                                         className="form-input ps-10 placeholder:text-white-dark"
                                                         value={selectedEvent?.type || ''} // Use selectedEvent eventId
-                                                        onChange={(e) => setSelectedEvent({ ...selectedEvent, type: e.target.value })}
+                                                        onChange={(e) => setSelectedEvent({ ...selectedEvent, type: Number(e.target.value) })}
                                                     >
                                                         <option value="" disabled>
                                                             Select Type
@@ -646,7 +646,7 @@ const Calendar = () => {
                                                         id="Status"
                                                         className="form-input ps-10 placeholder:text-white-dark"
                                                         value={selectedEvent?.className || ''}
-                                                        onChange={(e) => setSelectedEvent({ ...selectedEvent, className: e.target.value })}
+                                                        onChange={(e) => setSelectedEvent({ ...selectedEvent, className: Number(e.target.value) })}
                                                     >
                                                         <option value="" disabled>
                                                             Select Status

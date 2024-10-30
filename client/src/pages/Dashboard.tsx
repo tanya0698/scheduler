@@ -52,7 +52,7 @@ const Dashboard = () => {
 
     const fetchAppointments = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/top_appointments');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/top_appointments');
             console.log('Current Appointment Details:', response.data);
 
             if (response.data.success === true) {
@@ -75,7 +75,7 @@ const Dashboard = () => {
 
     const currentCount = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/completed/count');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/completed/count');
             console.log('Current Appointment Count:', response.data);
 
             if (response.data.success === true) {
@@ -96,7 +96,7 @@ const Dashboard = () => {
 
     const pendingCount = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/pending/count');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/pending/count');
             console.log('Pending Appointment Count:', response.data);
 
             if (response.data.success === true) {
@@ -117,7 +117,7 @@ const Dashboard = () => {
 
     const cancelledCount = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/cancelled/count');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/cancelled/count');
             console.log('Cancelled Appointment Count:', response.data);
 
             if (response.data.success === true) {
@@ -138,7 +138,7 @@ const Dashboard = () => {
 
     const totalCounted = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/total/count');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/total/count');
             console.log('Total Appointment Count:', response.data);
 
             if (response.data.success === true) {
@@ -159,7 +159,7 @@ const Dashboard = () => {
 
     const completeWork = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/completed/work');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/completed/work');
             console.log('Completed work:', response.data);
 
             if (response.data.success === true) {
@@ -180,7 +180,7 @@ const Dashboard = () => {
 
     const completeTravel = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/completed/travel');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/completed/travel');
             console.log('Travel work:', response.data);
 
             if (response.data.success === true) {
@@ -201,7 +201,7 @@ const Dashboard = () => {
 
     const completePersonal = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/completed/personal');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/completed/personal');
             console.log('Personal work:', response.data);
 
             if (response.data.success === true) {
@@ -222,7 +222,7 @@ const Dashboard = () => {
 
     const pendingWork = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/pending/work');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/pending/work');
             console.log('Pending work:', response.data);
 
             if (response.data.success === true) {
@@ -243,7 +243,7 @@ const Dashboard = () => {
 
     const pendingPersonal = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/pending/personal');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/pending/personal');
             console.log('Pending personal:', response.data);
 
             if (response.data.success === true) {
@@ -264,7 +264,7 @@ const Dashboard = () => {
 
     const pendingTravel = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/pending/travel');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/pending/travel');
             console.log('Pending travel:', response.data);
 
             if (response.data.success === true) {

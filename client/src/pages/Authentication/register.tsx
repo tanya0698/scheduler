@@ -46,7 +46,7 @@ const RegisterCover = () => {
 
     const fetchRoles = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/roles');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/roles');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -67,7 +67,7 @@ const RegisterCover = () => {
         e.preventDefault();
 
         try {
-            const response = await axios.post('http://localhost:4002/api/register', {
+            const response = await axios.post('https://server-side-5zbf.onrender.com/api/register', {
                 fullname,
                 email,
                 phone,

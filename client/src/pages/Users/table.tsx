@@ -45,7 +45,7 @@ const UsersTable = () => {
 
     const fetchRoles = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/roles');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/roles');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -64,7 +64,7 @@ const UsersTable = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/users');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/users');
             console.log('API Response:', response.data);
 
             if (response.data.success === true) {
@@ -87,7 +87,7 @@ const UsersTable = () => {
 
     const fetchUserDetails = async (managerId: any) => {
         try {
-            const response = await axios.get(`http://localhost:4002/api/editing/${managerId}`);
+            const response = await axios.get(`https://server-side-5zbf.onrender.com/api/editing/${managerId}`);
             console.log('User Details:', response.data);
 
             if (response.data.success) {
@@ -203,7 +203,7 @@ const UsersTable = () => {
                 roleId,
             });
 
-            const response = await axios.post('http://localhost:4002/api/create_user', {
+            const response = await axios.post('https://server-side-5zbf.onrender.com/api/create_user', {
                 fullname,
                 phone,
                 email,
@@ -243,7 +243,7 @@ const UsersTable = () => {
 
         try {
             // Send the PUT request with the updated appointment details
-            const response = await axios.put(`http://localhost:4002/api/update_user/${selectedUser.id}`, updatedUserData);
+            const response = await axios.put(`https://server-side-5zbf.onrender.com/api/update_user/${selectedUser.id}`, updatedUserData);
 
             if (response.data.success) {
                 console.log('User updated successfully:', response.data.message);
@@ -269,7 +269,7 @@ const UsersTable = () => {
 
     const deleteUser = async (managerId: string) => {
         try {
-            const response = await axios.delete(`http://localhost:4002/api/editing/${managerId}`);
+            const response = await axios.delete(`https://server-side-5zbf.onrender.com/api/editing/${managerId}`);
             console.log('Delete Response:', response.data);
 
             if (response.data.success) {

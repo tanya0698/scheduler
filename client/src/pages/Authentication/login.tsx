@@ -46,7 +46,7 @@ const LoginCover = () => {
         setError('');
 
         axios
-            .post('http://localhost:4002/api/login', {
+            .post('https://server-side-5zbf.onrender.com/api/login', {
                 email,
                 password,
             })

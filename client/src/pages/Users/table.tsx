@@ -241,6 +241,8 @@ const UsersTable = () => {
             roleId: selectedUser.type, // Change this to match the expected field name
         };
 
+        console.log('Updated User Data:', updatedUserData);
+
         try {
             // Send the PUT request with the updated appointment details
             const response = await axios.put(`https://server-side-5zbf.onrender.com/api/update_user/${selectedUser.id}`, updatedUserData);

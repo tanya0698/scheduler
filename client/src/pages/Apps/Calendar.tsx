@@ -240,6 +240,7 @@ const Calendar = () => {
             if (response.data.success) {
                 showMessage('Appointment has been created successfully.');
                 setModal1(false);
+                window.location.reload();
                 navigate('/apps/calendar');
             } else {
                 showMessage('Failed to update appointment:', response.data.message);

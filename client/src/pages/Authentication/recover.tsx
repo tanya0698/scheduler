@@ -8,6 +8,7 @@ import i18next from 'i18next';
 import IconCaretDown from '../../components/Icon/IconCaretDown';
 import IconMail from '../../components/Icon/IconMail';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const RecoverIdCover = () => {
     const dispatch = useDispatch();
@@ -31,14 +32,29 @@ const RecoverIdCover = () => {
     };
     const [flag, setFlag] = useState(themeConfig.locale);
 
+    const showMessage = (msg = '', type = 'success') => {
+        const toast: any = Swal.mixin({
+            toast: true,
+            position: 'top',
+            showConfirmButton: false,
+            timer: 3000,
+            customClass: { container: 'toast' },
+        });
+        toast.fire({
+            icon: type,
+            title: msg,
+            padding: '10px 20px',
+        });
+    };
+
     const submitForm = async (e: { preventDefault: () => void }) => {
         e.preventDefault();
         try {
             const response = await axios.post('https://server-side-5zbf.onrender.com/api/forgot_password', { email });
-            setSuccess('Email sent successfully!');
+            showMessage('Email sent successfully!');
             setError('Email not found.');
         } catch (error) {
-            setError('An error occurred. Please try again.');
+            showMessage('An error occurred. Please try again.');
             setSuccess('');
         }
     };

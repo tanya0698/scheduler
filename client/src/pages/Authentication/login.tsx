@@ -13,6 +13,7 @@ import IconFacebookCircle from '../../components/Icon/IconFacebookCircle';
 import IconTwitter from '../../components/Icon/IconTwitter';
 import IconGoogle from '../../components/Icon/IconGoogle';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const LoginCover = () => {
     const dispatch = useDispatch();
@@ -40,6 +41,21 @@ const LoginCover = () => {
     };
     const [flag, setFlag] = useState(themeConfig.locale);
 
+    const showMessage = (msg = '', type = 'success') => {
+        const toast: any = Swal.mixin({
+            toast: true,
+            position: 'top',
+            showConfirmButton: false,
+            timer: 3000,
+            customClass: { container: 'toast' },
+        });
+        toast.fire({
+            icon: type,
+            title: msg,
+            padding: '10px 20px',
+        });
+    };
+
     const submitForm = (e: { preventDefault: () => void }) => {
         e.preventDefault();
         setLoading(true);
@@ -57,6 +73,7 @@ const LoginCover = () => {
                 console.log('Response:', res.data);
 
                 if (!success) {
+                    showMessage('Incorrect Email or Password.');
                     setError('Incorrect Email or Password');
                     setResponseMessage('');
                 } else {
@@ -64,6 +81,7 @@ const LoginCover = () => {
                     localStorage.setItem('token', token);
                     localStorage.setItem('roleId', roleId);
                     const isAuthenticated = true;
+                    showMessage('Login successful.');
 
                     console.log('Navigating to the appropriate page based on role:', roleId);
                     if (roleId === 1) {

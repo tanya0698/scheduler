@@ -8,6 +8,7 @@ import i18next from 'i18next';
 import IconCaretDown from '../../components/Icon/IconCaretDown';
 import IconLockDots from '../../components/Icon/IconLockDots';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const UpdateCover = () => {
     const dispatch = useDispatch();
@@ -30,12 +31,27 @@ const UpdateCover = () => {
     };
     const [flag, setFlag] = useState(themeConfig.locale);
 
+    const showMessage = (msg = '', type = 'success') => {
+        const toast: any = Swal.mixin({
+            toast: true,
+            position: 'top',
+            showConfirmButton: false,
+            timer: 3000,
+            customClass: { container: 'toast' },
+        });
+        toast.fire({
+            icon: type,
+            title: msg,
+            padding: '10px 20px',
+        });
+    };
+
     const submitForm = async (e: { preventDefault: () => void }) => {
         e.preventDefault(); // Prevent default form submission
 
         // Validate passwords
         if (password !== cpassword) {
-            setError('Passwords do not match');
+            showMessage('Passwords do not match');
             return;
         }
 
@@ -49,12 +65,13 @@ const UpdateCover = () => {
             });
 
             if (response.data.success) {
+                showMessage('Password updated successfully.');
                 navigate('/auth/cover-login'); // Redirect on success
             } else {
-                setError(response.data.error || 'An error occurred');
+                showMessage(response.data.error || 'Failed to update password.');
             }
         } catch (error) {
-            setError('An error occurred. Please try again later.');
+            showMessage('An error occurred. Please try again later.');
         }
     };
 

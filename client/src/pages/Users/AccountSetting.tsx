@@ -4,6 +4,7 @@ import { setPageTitle } from '../../store/themeConfigSlice';
 import { useDispatch } from 'react-redux';
 import IconHome from '../../components/Icon/IconHome';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const AccountSetting = () => {
     const dispatch = useDispatch();
@@ -56,14 +57,29 @@ const AccountSetting = () => {
         setUser((prevData) => ({ ...prevData, [id]: value }));
     };
 
+    const showMessage = (msg = '', type = 'success') => {
+        const toast: any = Swal.mixin({
+            toast: true,
+            position: 'top',
+            showConfirmButton: false,
+            timer: 3000,
+            customClass: { container: 'toast' },
+        });
+        toast.fire({
+            icon: type,
+            title: msg,
+            padding: '10px 20px',
+        });
+    };
+
     const handleSubmit = async (e: { preventDefault: () => void }) => {
         e.preventDefault();
         try {
             await axios.post('https://server-side-5zbf.onrender.com/api/update_profile', userData);
-            alert('User  data updated successfully!');
+            showMessage('User  data updated successfully!');
         } catch (error) {
             console.error('Error updating user data:', error);
-            alert('Failed to update user data.');
+            showMessage('Failed to update user data.');
         }
     };
 

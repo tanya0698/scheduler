@@ -404,65 +404,6 @@ router.get("/users/:email", async (req, res) => {
   // No need to close the connection here; it should remain open for future requests
 });
 
-router.put("/update_user/:managerId", async (req, res) => {
-  const managerId = req.params.managerId; // Assuming managerId is a string in MongoDB
-  const { fullname, email, roleId, phone, address } = req.body;
-
-  // Check if at least one field is present
-  if (!fullname && !email && !roleId && !phone && !address) {
-    return res.status(400).json({
-      success: false,
-      error: "At least one field is required to update",
-    });
-  }
-
-  let db;
-  try {
-    // Connect to MongoDB
-    db = await connectToMongoDB();
-
-    // Check if email already exists for another user
-    if (email) {
-      const existingUser = await db.collection("manager").findOne({
-        email: email,
-        managerId: { $ne: managerId }, // Ensure that the userId is not the same
-      });
-
-      if (existingUser) {
-        return res
-          .status(400)
-          .json({ success: false, error: "Email already exists" });
-      }
-    }
-
-    // Prepare the update object
-    const updateFields = {};
-    if (fullname) updateFields.fullname = fullname;
-    if (email) updateFields.email = email;
-    if (roleId) updateFields.roleId = roleId;
-    if (phone) updateFields.phone = phone;
-    if (address) updateFields.address = address;
-
-    // Execute the update query
-    const result = await db.collection("manager").updateOne(
-      { managerId: managerId }, // Filter by userId
-      { $set: updateFields } // Update the fields
-    );
-
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ success: false, error: "User  not found" });
-    }
-
-    return res
-      .status(200)
-      .json({ success: true, message: "User  updated successfully" });
-  } catch (ex) {
-    console.error("Error:", ex); // Log the error
-    return res.status(500).json({ success: false, error: ex.message });
-  }
-  // No need to close the connection here; it should remain open for future requests
-});
-
 router.put("/update_profile", async (req, res) => {
   const { fullname, email: newEmail } = req.body;
   const currentEmail = localStorage.getItem("email");

@@ -72,11 +72,13 @@ const ChangeCover = () => {
                 console.log('Response:', res.data); // Log the entire response
 
                 if (!success) {
+                    showMessage('Passwords do not match.');
                     setError('Passwords do not match.');
                     setResponseMessage('');
                 } else {
                     setResponseMessage(token);
                     const isAuthenticated = true;
+                    showMessage('Password updated successfully.');
                     navigate('/', { state: { isAuthenticated } });
                     console.log('Navigating with token:', token);
                 }

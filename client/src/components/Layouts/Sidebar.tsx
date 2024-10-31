@@ -1,7 +1,7 @@
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { toggleSidebar } from '../../store/themeConfigSlice';
 import { IRootState } from '../../store';
 import { useState, useEffect } from 'react';
@@ -51,7 +51,15 @@ const Sidebar = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [location]);
 
+    const navigate = useNavigate();
     const roleId = localStorage.getItem('roleId');
+    const isLoggedIn = !!localStorage.getItem('token'); // Assuming you store a token when logged in
+
+    useEffect(() => {
+        if (!isLoggedIn) {
+            navigate('/auth/cover-login'); // Redirect to login if not logged in
+        }
+    }, [isLoggedIn, navigate]);
 
     return (
         <div className={semidark ? 'dark' : ''}>
@@ -75,10 +83,10 @@ const Sidebar = () => {
                     </div>
                     <PerfectScrollbar className="h-[calc(100vh-80px)] relative">
                         <ul className="relative font-semibold space-y-0.5 p-4 py-0">
-                            {roleId === '1' && (
+                            {roleId === '1' && isLoggedIn && (
                                 <>
                                     <li className="nav-item">
-                                        <NavLink to="/finance" className="group">
+                                        <NavLink to="/" className="group">
                                             <div className="flex items-center">
                                                 <IconMenuDashboard className="group-hover:!text-primary shrink-0" />
                                                 <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('dashboard')}</span>
@@ -112,7 +120,7 @@ const Sidebar = () => {
                                 </>
                             )}
 
-                            {roleId === '2' && (
+                            {roleId === '2' && isLoggedIn && (
                                 <li className="nav-item">
                                     <NavLink to="/users/user-table" className="group">
                                         <div className="flex items-center">

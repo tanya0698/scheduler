@@ -14,6 +14,7 @@ import IconFacebookCircle from '../../components/Icon/IconFacebookCircle';
 import IconTwitter from '../../components/Icon/IconTwitter';
 import IconGoogle from '../../components/Icon/IconGoogle';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const RegisterCover = () => {
     const dispatch = useDispatch();
@@ -63,6 +64,21 @@ const RegisterCover = () => {
         fetchRoles();
     }, []);
 
+    const showMessage = (msg = '', type = 'success') => {
+        const toast: any = Swal.mixin({
+            toast: true,
+            position: 'top',
+            showConfirmButton: false,
+            timer: 3000,
+            customClass: { container: 'toast' },
+        });
+        toast.fire({
+            icon: type,
+            title: msg,
+            padding: '10px 20px',
+        });
+    };
+
     const submitForm = async (e: { preventDefault: () => void }) => {
         e.preventDefault();
 
@@ -78,17 +94,15 @@ const RegisterCover = () => {
             });
 
             if (response.data.success) {
+                showMessage('Account has been created successfully.');
                 navigate('/auth/cover-login');
             } else {
+                showMessage('Failed to create your account. Please try again!.');
                 setError(response.data.error || 'An error occurred');
             }
         } catch (error) {
             setError('An error occurred. Please try again later.');
         }
-    };
-
-    const handleCancel = () => {
-        navigate('/auth/cover-login');
     };
 
     return (
@@ -245,14 +259,6 @@ const RegisterCover = () => {
                                     style={{ backgroundColor: '#0B2F9F', color: '#FFFFFF' }}
                                 >
                                     Sign Up
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="btn !mt-6 w-full border-0 uppercase shadow-[0_10px_20px_-10px_rgba(11,47,159,0.44)]"
-                                    style={{ backgroundColor: '#0B2F9F', color: '#FFFFFF' }}
-                                    onClick={handleCancel}
-                                >
-                                    Cancel
                                 </button>
                             </form>
 

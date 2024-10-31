@@ -1,6 +1,5 @@
 import { lazy } from 'react';
 const Home = lazy(() => import('../pages/Dashboard'));
-const Finance = lazy(() => import('../pages/Dashboard'));
 const Calendar = lazy(() => import('../pages/Apps/Calendar'));
 const Tabs = lazy(() => import('../pages/Components/Tabs'));
 const Accordians = lazy(() => import('../pages/Components/Accordians'));
@@ -81,16 +80,6 @@ const routes = [
     {
         path: '/',
         element: <Home />,
-    },
-    // {
-    //     path: '/index',
-    //     element: <Index />,
-    // },
-
-    // finance page
-    {
-        path: '/finance',
-        element: <Finance />,
     },
 
     // Apps page

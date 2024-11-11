@@ -24,6 +24,7 @@ const LoginCover = () => {
     const [responseMessage, setResponseMessage] = useState('');
     const [authenticated, setAuthenticated] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [togglePassword, setTogglePassword] = useState(false);
 
     useEffect(() => {
         dispatch(setPageTitle('Login'));
@@ -125,6 +126,7 @@ const LoginCover = () => {
                                             className="form-input ps-10 placeholder:text-white-dark"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
+                                            required
                                         />
                                         <span className="absolute start-4 top-1/2 -translate-y-1/2">
                                             <IconMail fill={true} />
@@ -136,15 +138,25 @@ const LoginCover = () => {
                                     <div className="relative text-white-dark">
                                         <input
                                             id="Password"
-                                            type="password"
+                                            type={togglePassword ? 'text' : 'password'}
                                             placeholder="Enter Password"
                                             className="form-input ps-10 placeholder:text-white-dark"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
+                                            required
                                         />
                                         <span className="absolute start-4 top-1/2 -translate-y-1/2">
                                             <IconLockDots fill={true} />
                                         </span>
+                                        <button
+                                            type="button"
+                                            style={{ color: '#FFB200' }}
+                                            className="absolute end-4 top-1/2 -translate-y-1/2"
+                                            onClick={() => setTogglePassword(!togglePassword)}
+                                            aria-label={togglePassword ? 'Hide password' : 'Show password'}
+                                        >
+                                            {togglePassword ? 'hide' : 'show'}
+                                        </button>
                                     </div>
                                 </div>
                                 <div>

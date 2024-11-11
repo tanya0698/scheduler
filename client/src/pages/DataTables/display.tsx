@@ -55,18 +55,25 @@ const Tables = () => {
             }
         } catch (error) {
             console.error('Error fetching current appointments', error);
-            setInitialRecords([]); // Reset initialRecords on error
+            setInitialRecords([]);
         }
     };
 
     useEffect(() => {
         fetchAppointments();
-        // Update the current date and time every second
-        const interval = setInterval(() => {
+
+        const intervalFetch = setInterval(() => {
+            fetchAppointments();
+        }, 10000);
+
+        const intervalDateTime = setInterval(() => {
             setCurrentDateTime(new Date().toLocaleString());
         }, 1000);
 
-        return () => clearInterval(interval); // Cleanup on unmount
+        return () => {
+            clearInterval(intervalFetch);
+            clearInterval(intervalDateTime);
+        };
     }, []);
 
     const toggleFullscreen = () => {

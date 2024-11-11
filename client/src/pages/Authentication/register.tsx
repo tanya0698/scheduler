@@ -28,6 +28,8 @@ const RegisterCover = () => {
     const [cpassword, setCpassword] = useState('');
     const [error, setError] = useState('');
     const [registrationSuccess, setRegistrationSuccess] = useState(false);
+    const [togglePassword, setTogglePassword] = useState(false);
+    const [toggleCpassword, setToggleCpassword] = useState(false);
 
     useEffect(() => {
         dispatch(setPageTitle('Register'));
@@ -132,6 +134,7 @@ const RegisterCover = () => {
                                             className="form-input ps-10 placeholder:text-white-dark"
                                             value={fullname}
                                             onChange={(e) => setFullname(e.target.value)}
+                                            required
                                         />
                                         <span className="absolute start-4 top-1/2 -translate-y-1/2">
                                             <IconUser fill={true} />
@@ -148,6 +151,7 @@ const RegisterCover = () => {
                                             className="form-input ps-10 placeholder:text-white-dark"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
+                                            required
                                         />
                                         <span className="absolute start-4 top-1/2 -translate-y-1/2">
                                             <IconMail fill={true} />
@@ -164,6 +168,7 @@ const RegisterCover = () => {
                                             className="form-input ps-10 placeholder:text-white-dark"
                                             value={address}
                                             onChange={(e) => setAddress(e.target.value)}
+                                            required
                                         />
                                         <span className="absolute start-4 top-1/2 -translate-y-1/2">
                                             <IconMail fill={true} />
@@ -180,6 +185,7 @@ const RegisterCover = () => {
                                             className="form-input ps-10 placeholder:text-white-dark"
                                             value={phone}
                                             onChange={(e) => setPhone(e.target.value)}
+                                            required
                                         />
                                         <span className="absolute start-4 top-1/2 -translate-y-1/2">
                                             <IconMail fill={true} />
@@ -189,12 +195,7 @@ const RegisterCover = () => {
                                 <div>
                                     <label htmlFor="Role">Select Role</label>
                                     <div className="relative text-white-dark">
-                                        <select
-                                            id="Role"
-                                            className="form-input ps-10 placeholder:text-white-dark"
-                                            value={roleId}
-                                            onChange={(e) => setRoleId(Number(e.target.value))} // Convert value to number
-                                        >
+                                        <select id="Role" className="form-input ps-10 placeholder:text-white-dark" value={roleId} onChange={(e) => setRoleId(Number(e.target.value))} required>
                                             <option value="" disabled>
                                                 Select Role
                                             </option>
@@ -220,31 +221,51 @@ const RegisterCover = () => {
                                     <div className="relative text-white-dark">
                                         <input
                                             id="Password"
-                                            type="password"
+                                            type={togglePassword ? 'text' : 'password'}
                                             placeholder="Enter Password"
                                             className="form-input ps-10 placeholder:text-white-dark"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
+                                            required
                                         />
                                         <span className="absolute start-4 top-1/2 -translate-y-1/2">
                                             <IconLockDots fill={true} />
                                         </span>
+                                        <button
+                                            type="button"
+                                            style={{ color: '#FFB200' }}
+                                            className="absolute end-4 top-1/2 -translate-y-1/2"
+                                            onClick={() => setTogglePassword(!togglePassword)}
+                                            aria-label={togglePassword ? 'Hide password' : 'Show password'}
+                                        >
+                                            {togglePassword ? 'hide' : 'show'}
+                                        </button>
                                     </div>
                                 </div>
                                 <div>
                                     <label htmlFor="Password">Confirm Password</label>
                                     <div className="relative text-white-dark">
                                         <input
-                                            id="Password"
-                                            type="password"
+                                            id="CPassword"
+                                            type={toggleCpassword ? 'text' : 'cpassword'}
                                             placeholder="Confirm Password"
                                             className="form-input ps-10 placeholder:text-white-dark"
                                             value={cpassword}
                                             onChange={(e) => setCpassword(e.target.value)}
+                                            required
                                         />
                                         <span className="absolute start-4 top-1/2 -translate-y-1/2">
                                             <IconLockDots fill={true} />
                                         </span>
+                                        <button
+                                            type="button"
+                                            style={{ color: '#FFB200' }}
+                                            className="absolute end-4 top-1/2 -translate-y-1/2"
+                                            onClick={() => setToggleCpassword(!toggleCpassword)}
+                                            aria-label={toggleCpassword ? 'Hide password' : 'Show password'}
+                                        >
+                                            {toggleCpassword ? 'hide' : 'show'}
+                                        </button>
                                     </div>
                                 </div>
                                 <div>

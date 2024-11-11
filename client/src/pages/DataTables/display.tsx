@@ -94,7 +94,7 @@ const Tables = () => {
                 width: '100vw',
                 height: '100vh',
                 overflow: 'auto',
-                backgroundColor: '#fff',
+                backgroundColor: 'navy',
                 zIndex: 999,
             }}
         >
@@ -103,28 +103,32 @@ const Tables = () => {
                     {/* dropdown */}
                     <div className="panel h-full">
                         <div className="flex items-center justify-between mb-5">
-                            <h5 className="font-semibold text-lg dark:text-white-light">Appointments Display</h5>
+                            <h5 style={{ color: 'orange', fontWeight: 'bold' }} className="font-bold text-lg dark:text-white-light">
+                                Appointments Display
+                            </h5>
                             <button type="button" onClick={toggleFullscreen} className="font-semibold hover:text-gray-400 dark:text-gray-400 dark:hover:text-gray-600">
-                                <span className="flex items-center">{currentDateTime}</span>
+                                <span style={{ color: 'orange', fontWeight: 'bold' }} className="flex items-center">
+                                    {currentDateTime}
+                                </span>
                             </button>
                         </div>
                         <div className="table-responsive mb-5">
-                            <table>
+                            <table style={{ backgroundColor: 'navy', width: '100%' }}>
                                 <thead>
                                     <tr>
-                                        <th>Number</th>
-                                        <th>Name</th>
-                                        <th>Location</th>
-                                        <th>From</th>
-                                        <th>To</th>
-                                        <th>Type</th>
-                                        <th>Status</th>
+                                        <th style={{ color: 'orange', fontWeight: 'bold' }}>NUMBER</th>
+                                        <th style={{ color: 'orange', fontWeight: 'bold' }}>NAME</th>
+                                        <th style={{ color: 'orange', fontWeight: 'bold' }}>LOCATION</th>
+                                        <th style={{ color: 'orange', fontWeight: 'bold' }}>FROM</th>
+                                        <th style={{ color: 'orange', fontWeight: 'bold' }}>TO</th>
+                                        <th style={{ color: 'orange', fontWeight: 'bold' }}>TYPE</th>
+                                        <th style={{ color: 'orange', fontWeight: 'bold' }}>STATUS</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {recordsData.map((data) => {
+                                    {recordsData.map((data, index) => {
                                         return (
-                                            <tr key={data.appointmentId}>
+                                            <tr key={data.appointmentId} style={{ backgroundColor: index % 2 === 0 ? 'navy' : '#024CAA', color: 'white' }}>
                                                 {' '}
                                                 {/* Add a unique key here */}
                                                 <td>{data.appointmentId}</td>
@@ -134,42 +138,8 @@ const Tables = () => {
                                                 <td>{data.appointmentLocation}</td>
                                                 <td>{reverseDate(data.appointmentFrom)}</td>
                                                 <td>{reverseDate(data.appointmentTo)}</td>
-                                                <td>
-                                                    <span
-                                                        className={`badge whitespace-nowrap ${
-                                                            data.event === 'Personal'
-                                                                ? 'badge badge-outline-primary'
-                                                                : data.event === 'Work'
-                                                                ? 'badge badge-outline-warning'
-                                                                : data.event === 'Travel'
-                                                                ? 'badge badge-outline-success'
-                                                                : data.event === 'Important'
-                                                                ? 'badge badge-outline-danger'
-                                                                : 'badge badge-outline-warning'
-                                                        }`}
-                                                    >
-                                                        {data.event}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <span
-                                                        className={`badge whitespace-nowrap ${
-                                                            data.status === 'Completed'
-                                                                ? 'badge badge-outline-primary'
-                                                                : data.status === 'Pending'
-                                                                ? 'badge badge-outline-success'
-                                                                : data.status === 'Rescheduled'
-                                                                ? 'badge badge-outline-secondary'
-                                                                : data.status === 'In Progress'
-                                                                ? 'badge badge-outline-secondary'
-                                                                : data.status === 'Cancelled'
-                                                                ? 'badge badge-outline-danger'
-                                                                : 'badge badge-outline-primary'
-                                                        }`}
-                                                    >
-                                                        {data.status}
-                                                    </span>
-                                                </td>
+                                                <td style={{ fontWeight: 'bold' }}>{data.event}</td>
+                                                <td style={{ fontWeight: 'bold' }}>{data.status}</td>
                                             </tr>
                                         );
                                     })}

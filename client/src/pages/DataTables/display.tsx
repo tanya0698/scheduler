@@ -103,11 +103,11 @@ const Tables = () => {
                     {/* dropdown */}
                     <div className="panel h-full">
                         <div className="flex items-center justify-between mb-5">
-                            <h5 style={{ color: 'orange', fontWeight: 'bold' }} className="font-bold text-lg dark:text-white-light">
+                            <h5 style={{ color: 'navy', fontWeight: 'bold' }} className="font-bold text-lg dark:text-white-light">
                                 Appointments Display
                             </h5>
                             <button type="button" onClick={toggleFullscreen} className="font-semibold hover:text-gray-400 dark:text-gray-400 dark:hover:text-gray-600">
-                                <span style={{ color: 'orange', fontWeight: 'bold' }} className="flex items-center">
+                                <span style={{ color: 'navy', fontWeight: 'bold' }} className="flex items-center">
                                     {currentDateTime}
                                 </span>
                             </button>
@@ -116,13 +116,13 @@ const Tables = () => {
                             <table style={{ backgroundColor: 'navy', width: '100%' }}>
                                 <thead>
                                     <tr>
-                                        <th style={{ color: 'orange', fontWeight: 'bold' }}>NUMBER</th>
-                                        <th style={{ color: 'orange', fontWeight: 'bold' }}>NAME</th>
-                                        <th style={{ color: 'orange', fontWeight: 'bold' }}>LOCATION</th>
-                                        <th style={{ color: 'orange', fontWeight: 'bold' }}>FROM</th>
-                                        <th style={{ color: 'orange', fontWeight: 'bold' }}>TO</th>
-                                        <th style={{ color: 'orange', fontWeight: 'bold' }}>TYPE</th>
-                                        <th style={{ color: 'orange', fontWeight: 'bold' }}>STATUS</th>
+                                        <th style={{ color: 'navy', fontWeight: 'bold' }}>NUMBER</th>
+                                        <th style={{ color: 'navy', fontWeight: 'bold' }}>NAME</th>
+                                        <th style={{ color: 'navy', fontWeight: 'bold' }}>LOCATION</th>
+                                        <th style={{ color: 'navy', fontWeight: 'bold' }}>FROM</th>
+                                        <th style={{ color: 'navy', fontWeight: 'bold' }}>TO</th>
+                                        <th style={{ color: 'navy', fontWeight: 'bold' }}>TYPE</th>
+                                        <th style={{ color: 'navy', fontWeight: 'bold' }}>STATUS</th>
                                     </tr>
                                 </thead>
                                 <tbody>

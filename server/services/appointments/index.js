@@ -147,6 +147,11 @@ router.get("/appointments", async (req, res) => {
           $unwind: "$statusDetails",
         },
         {
+          $sort: {
+            createdAt: -1,
+          },
+        },
+        {
           $project: {
             appointmentId: "$appointmentId",
             appointmentName: "$appointmentName",
@@ -304,6 +309,11 @@ router.get("/current", async (req, res) => {
         },
         {
           $unwind: "$statusDetails",
+        },
+        {
+          $sort: {
+            createdAt: -1,
+          },
         },
         {
           $project: {

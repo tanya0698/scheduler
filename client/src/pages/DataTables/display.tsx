@@ -23,15 +23,12 @@ const Tables = () => {
 
     const reverseDate = (dateString: string | number | Date) => {
         const date = new Date(dateString);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
-        const day = String(date.getDate()).padStart(2, '0');
+
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
         // Removed seconds and milliseconds since you only need "yyyy-MM-ddThh:mm"
         return (
             <>
-                {year}-{month}-{day}
                 {Array(4).fill(<>&nbsp;</>)} {/* Creates four non-breaking spaces */}
                 <b>
                     {hours}:{minutes}
@@ -103,11 +100,11 @@ const Tables = () => {
                     {/* dropdown */}
                     <div className="panel h-full">
                         <div className="flex items-center justify-between mb-5">
-                            <h5 style={{ color: 'navy', fontWeight: 'bold' }} className="font-bold text-lg dark:text-white-light">
+                            <h5 style={{ color: 'navy', fontWeight: 'bold', fontSize: 35 }} className="font-bold text-lg dark:text-white-light">
                                 Appointments Display
                             </h5>
                             <button type="button" onClick={toggleFullscreen} className="font-semibold hover:text-gray-400 dark:text-gray-400 dark:hover:text-gray-600">
-                                <span style={{ color: 'navy', fontWeight: 'bold' }} className="flex items-center">
+                                <span style={{ color: 'navy', fontWeight: 'bold', fontSize: 35 }} className="flex items-center">
                                     {currentDateTime}
                                 </span>
                             </button>
@@ -116,13 +113,11 @@ const Tables = () => {
                             <table style={{ backgroundColor: 'navy', width: '100%' }}>
                                 <thead>
                                     <tr>
-                                        <th style={{ color: 'navy', fontWeight: 'bold' }}>NUMBER</th>
-                                        <th style={{ color: 'navy', fontWeight: 'bold' }}>NAME</th>
-                                        <th style={{ color: 'navy', fontWeight: 'bold' }}>LOCATION</th>
-                                        <th style={{ color: 'navy', fontWeight: 'bold' }}>FROM</th>
-                                        <th style={{ color: 'navy', fontWeight: 'bold' }}>TO</th>
-                                        <th style={{ color: 'navy', fontWeight: 'bold' }}>TYPE</th>
-                                        <th style={{ color: 'navy', fontWeight: 'bold' }}>STATUS</th>
+                                        <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 30 }}>NAME</th>
+                                        <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 30 }}>LOCATION</th>
+                                        <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 30 }}>FROM</th>
+                                        <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 30 }}>TYPE</th>
+                                        <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 30 }}>STATUS</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -130,16 +125,13 @@ const Tables = () => {
                                         return (
                                             <tr key={data.appointmentId} style={{ backgroundColor: index % 2 === 0 ? 'navy' : '#024CAA', color: 'white' }}>
                                                 {' '}
-                                                {/* Add a unique key here */}
-                                                <td>{data.appointmentId}</td>
-                                                <td>
+                                                <td style={{ fontWeight: 'bold', fontSize: 20, textTransform: 'uppercase' }}>
                                                     <div className="whitespace-nowrap">{data.appointmentName}</div>
                                                 </td>
-                                                <td>{data.appointmentLocation}</td>
-                                                <td>{reverseDate(data.appointmentFrom)}</td>
-                                                <td>{reverseDate(data.appointmentTo)}</td>
-                                                <td style={{ fontWeight: 'bold' }}>{data.event}</td>
-                                                <td style={{ fontWeight: 'bold' }}>{data.status}</td>
+                                                <td style={{ fontWeight: 'bold', fontSize: 20, textTransform: 'uppercase' }}>{data.appointmentLocation}</td>
+                                                <td style={{ fontWeight: 'bold', fontSize: 20 }}>{reverseDate(data.appointmentFrom)}</td>
+                                                <td style={{ fontWeight: 'bold', fontSize: 20, textTransform: 'uppercase' }}>{data.event}</td>
+                                                <td style={{ fontWeight: 'bold', fontSize: 20, textTransform: 'uppercase' }}>{data.status}</td>
                                             </tr>
                                         );
                                     })}

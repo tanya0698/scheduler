@@ -613,6 +613,11 @@ router.get("/top_appointments", async (req, res) => {
           $unwind: "$statusDetails",
         },
         {
+          $sort: {
+            createdAt: -1,
+          },
+        },
+        {
           $project: {
             appointmentId: "$appointmentId",
             appointmentName: "$appointmentName",

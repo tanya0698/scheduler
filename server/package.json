@@ -1,7 +1,7 @@
 {
-  "name": "appoint-scheduler",
+  "name": "appoint-scheduler_elton-chipuka",
   "version": "0.1.0",
-  "description": "routes server",
+  "description": "routes server created by elton chipuka",
   "engines": {
     "node": "16.x"
   },

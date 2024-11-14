@@ -99,10 +99,10 @@ const Tables = () => {
                 <div className="col-span-12 h-full">
                     {/* dropdown */}
                     <div className="panel h-full">
-                        <div className="flex items-center justify-between mb-5" style={{ backgroundColor: 'navy' }}>
-                            <h5 style={{ color: 'orange', fontWeight: 'bold', fontSize: 30 }}>Appointments Display</h5>
+                        <div className="flex items-center justify-between mb-5">
+                            <h5 style={{ color: 'navy', fontWeight: 'bold', fontSize: 35 }}>Appointments Display</h5>
                             <button type="button" onClick={toggleFullscreen} className="font-semibold hover:text-gray-400 dark:text-gray-400 dark:hover:text-gray-600">
-                                <span style={{ color: 'orange', fontWeight: 'bold', fontSize: 30 }} className="flex items-center">
+                                <span style={{ color: 'navy', fontWeight: 'bold', fontSize: 25 }} className="flex items-center">
                                     {currentDateTime}
                                 </span>
                             </button>

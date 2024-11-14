@@ -449,11 +449,9 @@ const Dashboard = () => {
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Number</th>
+                                        <th>Start</th>
                                         <th>Name</th>
                                         <th>Location</th>
-                                        <th>From</th>
-                                        <th>To</th>
                                         <th>Type</th>
                                         <th>Status</th>
                                     </tr>
@@ -462,13 +460,11 @@ const Dashboard = () => {
                                     {recordsData.map((data) => {
                                         return (
                                             <tr>
-                                                <td>{data.appointmentId}</td>
+                                                <td>{reverseDate(data.appointmentFrom)}</td>
                                                 <td>
                                                     <div className="whitespace-nowrap">{data.appointmentName}</div>
                                                 </td>
                                                 <td>{data.appointmentLocation}</td>
-                                                <td>{reverseDate(data.appointmentFrom)}</td> {/* Format appointmentFrom */}
-                                                <td>{reverseDate(data.appointmentTo)}</td>
                                                 <td>
                                                     <span
                                                         className={`badge whitespace-nowrap ${

@@ -99,25 +99,24 @@ const Tables = () => {
                 <div className="col-span-12 h-full">
                     {/* dropdown */}
                     <div className="panel h-full">
-                        <div className="flex items-center justify-between mb-5">
-                            <h5 style={{ color: 'navy', fontWeight: 'bold', fontSize: 35 }} className="font-bold text-lg dark:text-white-light">
-                                Appointments Display
-                            </h5>
+                        <div className="flex items-center justify-between mb-5" style={{ backgroundColor: 'navy' }}>
+                            <h5 style={{ color: 'orange', fontWeight: 'bold', fontSize: 30 }}>Appointments Display</h5>
                             <button type="button" onClick={toggleFullscreen} className="font-semibold hover:text-gray-400 dark:text-gray-400 dark:hover:text-gray-600">
-                                <span style={{ color: 'navy', fontWeight: 'bold', fontSize: 35 }} className="flex items-center">
+                                <span style={{ color: 'orange', fontWeight: 'bold', fontSize: 30 }} className="flex items-center">
                                     {currentDateTime}
                                 </span>
                             </button>
                         </div>
+                        <div className="flex items-center justify-between mb-5"></div>
                         <div className="table-responsive mb-5">
                             <table style={{ backgroundColor: 'navy', width: '100%' }}>
                                 <thead>
                                     <tr>
-                                        <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 30 }}>NAME</th>
-                                        <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 30 }}>LOCATION</th>
-                                        <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 30 }}>FROM</th>
-                                        <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 30 }}>TYPE</th>
-                                        <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 30 }}>STATUS</th>
+                                        <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 25 }}>NAME</th>
+                                        <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 25 }}>LOCATION</th>
+                                        <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 25 }}>TIME</th>
+                                        <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 25 }}>TYPE</th>
+                                        <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 25 }}>STATUS</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -130,8 +129,37 @@ const Tables = () => {
                                                 </td>
                                                 <td style={{ fontWeight: 'bold', fontSize: 20, textTransform: 'uppercase' }}>{data.appointmentLocation}</td>
                                                 <td style={{ fontWeight: 'bold', fontSize: 20 }}>{reverseDate(data.appointmentFrom)}</td>
-                                                <td style={{ fontWeight: 'bold', fontSize: 20, textTransform: 'uppercase' }}>{data.event}</td>
-                                                <td style={{ fontWeight: 'bold', fontSize: 20, textTransform: 'uppercase' }}>{data.status}</td>
+                                                <td
+                                                    style={{
+                                                        fontWeight: 'bold',
+                                                        fontSize: 20,
+                                                        textTransform: 'uppercase',
+                                                        color: data.event === 'work' ? 'orange' : data.event === 'travel' ? 'red' : 'yellow',
+                                                    }}
+                                                >
+                                                    {data.event}
+                                                </td>
+                                                <td
+                                                    style={{
+                                                        fontWeight: 'bold',
+                                                        fontSize: 20,
+                                                        textTransform: 'uppercase',
+                                                        color:
+                                                            data.status === 'Pending'
+                                                                ? 'orange'
+                                                                : data.status === 'Completed'
+                                                                ? 'green'
+                                                                : data.status === 'Cancelled'
+                                                                ? 'red'
+                                                                : data.status === 'Rescheduled'
+                                                                ? 'purple'
+                                                                : data.status === 'InProgress'
+                                                                ? 'yellow'
+                                                                : 'white',
+                                                    }}
+                                                >
+                                                    {data.status}
+                                                </td>
                                             </tr>
                                         );
                                     })}

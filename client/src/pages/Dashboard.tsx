@@ -159,7 +159,7 @@ const Dashboard = () => {
 
     const completeWork = async () => {
         try {
-            const response = await axios.get('https://server-side-5zbf.onrender.com/api/completed/work');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/completed/on-campus');
             console.log('Completed work:', response.data);
 
             if (response.data.success === true) {
@@ -180,7 +180,7 @@ const Dashboard = () => {
 
     const completeTravel = async () => {
         try {
-            const response = await axios.get('https://server-side-5zbf.onrender.com/api/completed/travel');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/completed/off-campus');
             console.log('Travel work:', response.data);
 
             if (response.data.success === true) {
@@ -201,7 +201,7 @@ const Dashboard = () => {
 
     const completePersonal = async () => {
         try {
-            const response = await axios.get('https://server-side-5zbf.onrender.com/api/completed/personal');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/completed/travel');
             console.log('Personal work:', response.data);
 
             if (response.data.success === true) {
@@ -222,7 +222,7 @@ const Dashboard = () => {
 
     const pendingWork = async () => {
         try {
-            const response = await axios.get('https://server-side-5zbf.onrender.com/api/pending/work');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/pending/on-campus');
             console.log('Pending work:', response.data);
 
             if (response.data.success === true) {
@@ -243,7 +243,7 @@ const Dashboard = () => {
 
     const pendingPersonal = async () => {
         try {
-            const response = await axios.get('https://server-side-5zbf.onrender.com/api/pending/personal');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/pending/travel');
             console.log('Pending personal:', response.data);
 
             if (response.data.success === true) {
@@ -264,7 +264,7 @@ const Dashboard = () => {
 
     const pendingTravel = async () => {
         try {
-            const response = await axios.get('https://server-side-5zbf.onrender.com/api/pending/travel');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/pending/off-campus');
             console.log('Pending travel:', response.data);
 
             if (response.data.success === true) {
@@ -394,15 +394,15 @@ const Dashboard = () => {
                                 </div>
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                                     <div>
-                                        <div className="text-primary">Personal</div>
+                                        <div className="text-primary">Travel</div>
                                         <div className="mt-2 font-semibold text-2xl"> {prevPersonal !== null ? `${prevPersonal}` : 'Loading...'}</div>
                                     </div>
                                     <div>
-                                        <div className="text-primary">Work</div>
+                                        <div className="text-primary">On Campus</div>
                                         <div className="mt-2 font-semibold text-2xl"> {prevWork !== null ? `${prevWork}` : 'Loading...'}</div>
                                     </div>
                                     <div>
-                                        <div className="text-primary">Traveling</div>
+                                        <div className="text-primary">Off Campus</div>
                                         <div className="mt-2 font-semibold text-2xl"> {prevTravel !== null ? `${prevTravel}` : 'Loading...'}</div>
                                     </div>
                                 </div>
@@ -426,15 +426,15 @@ const Dashboard = () => {
 
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                                     <div>
-                                        <div className="text-primary">Personal</div>
+                                        <div className="text-primary">Travel</div>
                                         <div className="mt-2 font-semibold text-2xl">{nextPersonal !== null ? `${nextPersonal}` : 'Loading...'}</div>
                                     </div>
                                     <div>
-                                        <div className="text-primary">Work</div>
+                                        <div className="text-primary">On Campus</div>
                                         <div className="mt-2 font-semibold text-2xl">{nextWork !== null ? `${nextWork}` : 'Loading...'}</div>
                                     </div>
                                     <div>
-                                        <div className="text-primary">Traveling</div>
+                                        <div className="text-primary">Off Campus</div>
                                         <div className="mt-2 font-semibold text-2xl">{nextTravel !== null ? `${nextTravel}` : 'Loading...'}</div>
                                     </div>
                                 </div>

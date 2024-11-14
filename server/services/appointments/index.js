@@ -451,7 +451,7 @@ router.get("/progress/count", async (req, res) => {
   }
 });
 
-router.get("/pending/work", async (req, res) => {
+router.get("/pending/on-campus", async (req, res) => {
   try {
     // Connect to MongoDB
     const db = await connectToMongoDB();
@@ -471,7 +471,7 @@ router.get("/pending/work", async (req, res) => {
   }
 });
 
-router.get("/pending/personal", async (req, res) => {
+router.get("/pending/travel", async (req, res) => {
   try {
     // Connect to MongoDB
     const db = await connectToMongoDB();
@@ -491,7 +491,7 @@ router.get("/pending/personal", async (req, res) => {
   }
 });
 
-router.get("/pending/travel", async (req, res) => {
+router.get("/pending/off-campus", async (req, res) => {
   try {
     // Connect to MongoDB
     const db = await connectToMongoDB();
@@ -511,7 +511,7 @@ router.get("/pending/travel", async (req, res) => {
   }
 });
 
-router.get("/completed/work", async (req, res) => {
+router.get("/completed/on-campus", async (req, res) => {
   try {
     // Connect to MongoDB
     const db = await connectToMongoDB();
@@ -531,7 +531,7 @@ router.get("/completed/work", async (req, res) => {
   }
 });
 
-router.get("/completed/personal", async (req, res) => {
+router.get("/completed/travel", async (req, res) => {
   try {
     // Connect to MongoDB
     const db = await connectToMongoDB();
@@ -551,7 +551,7 @@ router.get("/completed/personal", async (req, res) => {
   }
 });
 
-router.get("/completed/travel", async (req, res) => {
+router.get("/completed/off-campus", async (req, res) => {
   try {
     // Connect to MongoDB
     const db = await connectToMongoDB();

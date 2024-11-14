@@ -778,20 +778,7 @@
         }
       }
     },
-    "/pending/work": {
-      "get": {
-        "description": "",
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/pending/personal": {
+    "/pending/on-campus": {
       "get": {
         "description": "",
         "responses": {
@@ -817,7 +804,7 @@
         }
       }
     },
-    "/completed/work": {
+    "/pending/off-campus": {
       "get": {
         "description": "",
         "responses": {
@@ -830,7 +817,7 @@
         }
       }
     },
-    "/completed/personal": {
+    "/completed/on-campus": {
       "get": {
         "description": "",
         "responses": {
@@ -844,6 +831,19 @@
       }
     },
     "/completed/travel": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/completed/off-campus": {
       "get": {
         "description": "",
         "responses": {

@@ -112,9 +112,9 @@ const Tables = () => {
                             <table style={{ backgroundColor: 'navy', width: '100%' }}>
                                 <thead>
                                     <tr>
+                                        <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 25 }}>TIME</th>
                                         <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 25 }}>NAME</th>
                                         <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 25 }}>LOCATION</th>
-                                        <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 25 }}>TIME</th>
                                         <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 25 }}>TYPE</th>
                                         <th style={{ color: 'navy', fontWeight: 'bold', fontSize: 25 }}>STATUS</th>
                                     </tr>
@@ -124,17 +124,17 @@ const Tables = () => {
                                         return (
                                             <tr key={data.appointmentId} style={{ backgroundColor: index % 2 === 0 ? 'navy' : '#024CAA', color: 'white' }}>
                                                 {' '}
+                                                <td style={{ fontWeight: 'bold', fontSize: 20 }}>{reverseDate(data.appointmentFrom)}</td>
                                                 <td style={{ fontWeight: 'bold', fontSize: 20, textTransform: 'uppercase' }}>
                                                     <div className="whitespace-nowrap">{data.appointmentName}</div>
                                                 </td>
                                                 <td style={{ fontWeight: 'bold', fontSize: 20, textTransform: 'uppercase' }}>{data.appointmentLocation}</td>
-                                                <td style={{ fontWeight: 'bold', fontSize: 20 }}>{reverseDate(data.appointmentFrom)}</td>
                                                 <td
                                                     style={{
                                                         fontWeight: 'bold',
                                                         fontSize: 20,
                                                         textTransform: 'uppercase',
-                                                        color: data.event === 'work' ? 'orange' : data.event === 'travel' ? 'red' : 'yellow',
+                                                        color: data.event === 'On Campus' ? '#F09319' : data.event === 'Off Campus' ? '#FA4032' : data.event === 'Travel' ? '#FFEB00' : 'white',
                                                     }}
                                                 >
                                                     {data.event}
@@ -146,15 +146,15 @@ const Tables = () => {
                                                         textTransform: 'uppercase',
                                                         color:
                                                             data.status === 'Pending'
-                                                                ? 'orange'
+                                                                ? '#F09319'
                                                                 : data.status === 'Completed'
-                                                                ? 'green'
+                                                                ? '#06D001'
                                                                 : data.status === 'Cancelled'
-                                                                ? 'red'
+                                                                ? '#FA4032'
                                                                 : data.status === 'Rescheduled'
-                                                                ? 'purple'
+                                                                ? '#4CC9FE'
                                                                 : data.status === 'InProgress'
-                                                                ? 'yellow'
+                                                                ? '#9BEC00'
                                                                 : 'white',
                                                     }}
                                                 >

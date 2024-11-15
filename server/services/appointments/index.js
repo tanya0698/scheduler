@@ -312,7 +312,7 @@ router.get("/current", async (req, res) => {
         },
         {
           $sort: {
-            createdAt: -1,
+            createdAt: 1,
           },
         },
         {

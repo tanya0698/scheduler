@@ -117,10 +117,8 @@ router.put("/update_appointment/:appointmentId", async (req, res) => {
 
 router.get("/appointments", async (req, res) => {
   try {
-    // Connect to MongoDB
     const db = await connectToMongoDB();
 
-    // Find the top 5 appointments, joining with events and status collections
     const appointments = await db
       .collection("appointments")
       .aggregate([
@@ -166,9 +164,16 @@ router.get("/appointments", async (req, res) => {
       ])
       .toArray();
 
-    res.status(200).json({ success: true, data: appointments });
+    // Convert UTC dates to local dates
+    const localAppointments = appointments.map((appointment) => ({
+      ...appointment,
+      appointmentFrom: new Date(appointment.appointmentFrom).toLocaleString(), // Convert to local time
+      appointmentTo: new Date(appointment.appointmentTo).toLocaleString(), // Convert to local time
+    }));
+
+    res.status(200).json({ success: true, data: localAppointments });
   } catch (ex) {
-    console.error("Database query error:", ex); // Log the error for debugging
+    console.error("Database query error:", ex);
     res.status(500).json({ success: false, error: ex.message });
   }
 });
@@ -177,16 +182,14 @@ router.get("/appointments/:appointmentId", async (req, res) => {
   const appointmentId = parseInt(req.params.appointmentId);
 
   try {
-    // Connect to MongoDB
     const db = await connectToMongoDB();
 
-    // Use the aggregate method to join collections based on appointmentId
     const appointmentDetails = await db
       .collection("appointments")
       .aggregate([
         {
           $match: {
-            appointmentId: appointmentId, // Match the appointmentId from the URL
+            appointmentId: appointmentId,
           },
         },
         {
@@ -224,7 +227,7 @@ router.get("/appointments/:appointmentId", async (req, res) => {
           },
         },
       ])
-      .toArray(); // Convert the cursor to an array
+      .toArray();
 
     if (appointmentDetails.length === 0) {
       return res
@@ -232,9 +235,18 @@ router.get("/appointments/:appointmentId", async (req, res) => {
         .json({ success: false, message: "Appointment not found" });
     }
 
-    res.status(200).json({ success: true, data: appointmentDetails[0] }); // Return the first appointment detail
+    // Convert UTC dates to local dates
+    const appointment = appointmentDetails[0];
+    appointment.appointmentFrom = new Date(
+      appointment.appointmentFrom
+    ).toLocaleString(); // Convert to local time
+    appointment.appointmentTo = new Date(
+      appointment.appointmentTo
+    ).toLocaleString(); // Convert to local time
+
+    res.status(200).json({ success: true, data: appointment });
   } catch (ex) {
-    console.error("Database query error:", ex); // Log the error for debugging
+    console.error("Database query error:", ex);
     res.status(500).json({ success: false, error: ex.message });
   }
 });

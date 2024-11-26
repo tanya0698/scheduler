@@ -324,7 +324,7 @@ router.get("/current", async (req, res) => {
         },
         {
           $sort: {
-            createdAt: -1,
+            appointmentFrom: 1,
           },
         },
         {

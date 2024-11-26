@@ -52,7 +52,7 @@ const Header = () => {
 
     const fetchAppointments = async () => {
         try {
-            const response = await axios.get('http://localhost:4002/api/appointments');
+            const response = await axios.get('https://server-side-5zbf.onrender.com/api/appointments');
             if (response.data.success) {
                 const rowData = response.data.data; // Adjust according to the actual structure
                 setAppointments(rowData);

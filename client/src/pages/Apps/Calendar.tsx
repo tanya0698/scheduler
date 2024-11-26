@@ -95,7 +95,15 @@ const Calendar = () => {
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
         // Removed seconds and milliseconds since you only need "yyyy-MM-ddThh:mm"
-        return `${year}-${month}-${day}T${hours}:${minutes}`; // Adjusted format for datetime-local
+        return (
+            <>
+                {year}-{month}-{day}
+                {Array(4).fill(<>&nbsp;</>)} {/* Creates four non-breaking spaces */}
+                <b>
+                    {hours}:{minutes}
+                </b>
+            </>
+        );
     };
 
     const showMessage = (msg = '', type = 'success') => {
@@ -121,31 +129,31 @@ const Calendar = () => {
             if (response.data.success === true) {
                 // Map the fetched appointments to the required structure
                 const formattedEvents = response.data.data.map(
-                    (appointment: { eventId: any; appointmentId: any; appointmentName: any; appointmentFrom: any; appointmentTo: any; appointmentDescription: any }) => {
+                    (appointment: { eventId: any; appointmentId: any; appointmentName: any; appointmentFrom: Date; appointmentTo: Date; appointmentDescription: any; statusId: any }) => {
                         // Determine the class based on the type
                         let className = '';
-                        switch (appointment.eventId) {
+                        switch (appointment.statusId) {
                             case 1:
-                                className = 'bg-success text-white'; // Bootstrap danger
+                                className = 'bg-success text-white';
                                 break;
                             case 2:
-                                className = 'bg-primary text-white'; // Bootstrap success
+                                className = 'bg-primary text-white';
                                 break;
                             case 3:
-                                className = 'bg-info text-white'; // Bootstrap info
+                                className = 'bg-info text-white';
                                 break;
                             case 4:
-                                className = 'bg-danger text-white'; // Bootstrap info
+                                className = 'bg-danger text-white';
                                 break;
                             default:
-                                className = 'bg-primary text-white'; // Default
+                                className = 'bg-primary text-white';
                         }
 
                         return {
                             id: appointment.appointmentId,
                             title: appointment.appointmentName,
-                            start: appointment.appointmentFrom,
-                            end: appointment.appointmentTo,
+                            start: formatDate(appointment.appointmentFrom),
+                            end: formatDate(appointment.appointmentTo),
                             classNames: [className], // Set the Bootstrap class names
                             description: appointment.appointmentDescription,
                             type: appointment.eventId,
@@ -153,7 +161,7 @@ const Calendar = () => {
                     }
                 );
                 setEvents2(formattedEvents); // Set the formatted events
-                console.log('Fetched appointments:', formattedEvents);
+                console.log('Fetched appointments for calender display:', formattedEvents);
             }
         } catch (error) {
             console.error('Error fetching appointments to render on calender', error);
@@ -180,8 +188,8 @@ const Calendar = () => {
                 const formattedEvent = {
                     id: appointment.appointmentId,
                     title: appointment.appointmentName,
-                    start: reverseDate(appointment.appointmentFrom),
-                    end: reverseDate(appointment.appointmentTo),
+                    start: formatDate(appointment.appointmentFrom),
+                    end: formatDate(appointment.appointmentTo),
                     className: statusObj ? statusObj.statusId : null,
                     description: appointment.appointmentDescription,
                     type: eventObj ? eventObj.eventId : null,
@@ -190,12 +198,12 @@ const Calendar = () => {
 
                 // Set the selected event to the formatted event object
                 setSelectedEvent(formattedEvent);
-                console.log('Fetched appointment to be updated:', formattedEvent);
+                console.log('Fetched appointment to be updated on calender:', formattedEvent);
             } else {
-                console.error('Failed to fetch appointment details:', response.data.message);
+                console.error('Failed to fetch appointment details on calender:', response.data.message);
             }
         } catch (error) {
-            console.error('Error fetching appointment details to be updated:', error);
+            console.error('Error fetching appointment details to be updated on calender:', error);
         }
     };
 

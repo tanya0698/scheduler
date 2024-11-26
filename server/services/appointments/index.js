@@ -342,7 +342,14 @@ router.get("/current", async (req, res) => {
       ])
       .toArray();
 
-    res.status(200).json({ success: true, data: appointments });
+    // Convert UTC dates to local dates
+    const localAppointments = appointments.map((appointment) => ({
+      ...appointment,
+      appointmentFrom: new Date(appointment.appointmentFrom).toLocaleString(), // Convert to local time
+      appointmentTo: new Date(appointment.appointmentTo).toLocaleString(), // Convert to local time
+    }));
+
+    res.status(200).json({ success: true, data: localAppointments });
   } catch (ex) {
     console.error("Database query error:", ex); // Log the error for debugging
     res.status(500).json({ success: false, error: ex.message });
@@ -647,7 +654,13 @@ router.get("/top_appointments", async (req, res) => {
       ])
       .toArray();
 
-    res.status(200).json({ success: true, data: appointments });
+    const localAppointments = appointments.map((appointment) => ({
+      ...appointment,
+      appointmentFrom: new Date(appointment.appointmentFrom).toLocaleString(), // Convert to local time
+      appointmentTo: new Date(appointment.appointmentTo).toLocaleString(), // Convert to local time
+    }));
+
+    res.status(200).json({ success: true, data: localAppointments });
   } catch (ex) {
     console.error("Database query error:", ex); // Log the error for debugging
     res.status(500).json({ success: false, error: ex.message });

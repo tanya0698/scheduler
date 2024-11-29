@@ -1,4 +1,6 @@
 import { lazy } from 'react';
+import { Navigate } from 'react-router-dom';
+
 const Home = lazy(() => import('../pages/Dashboard'));
 const Calendar = lazy(() => import('../pages/Apps/Calendar'));
 const Tabs = lazy(() => import('../pages/Components/Tabs'));
@@ -76,9 +78,41 @@ const DateRangePicker = lazy(() => import('../pages/Forms/DateRangePicker'));
 const Clipboard = lazy(() => import('../pages/Forms/Clipboard'));
 
 const routes = [
-    // dashboard
+    {
+        path: '/auth/cover-login',
+        element: <LoginCover />,
+        layout: 'blank',
+    },
+    {
+        path: '/auth/cover-register',
+        element: <RegisterCover />,
+        layout: 'blank',
+    },
+    {
+        path: '/auth/cover-update',
+        element: <UpdateCover />,
+        layout: 'blank',
+    },
+    {
+        path: '/auth/cover-change',
+        element: <ChangeCover />,
+        layout: 'blank',
+    },
+    {
+        path: '/auth/cover-password-reset',
+        element: <RecoverIdCover />,
+        layout: 'blank',
+    },
+    //forms page
+
     {
         path: '/',
+        element: <Navigate to="/auth/cover-login" />, // Redirect to login page
+    },
+
+    // dashboard
+    {
+        path: '/Dashboard',
         element: <Home />,
     },
 
@@ -318,32 +352,6 @@ const routes = [
     },
     //Authentication
 
-    {
-        path: '/auth/cover-login',
-        element: <LoginCover />,
-        layout: 'blank',
-    },
-    {
-        path: '/auth/cover-register',
-        element: <RegisterCover />,
-        layout: 'blank',
-    },
-    {
-        path: '/auth/cover-update',
-        element: <UpdateCover />,
-        layout: 'blank',
-    },
-    {
-        path: '/auth/cover-change',
-        element: <ChangeCover />,
-        layout: 'blank',
-    },
-    {
-        path: '/auth/cover-password-reset',
-        element: <RecoverIdCover />,
-        layout: 'blank',
-    },
-    //forms page
     {
         path: '/forms/basic',
         element: <FormBasic />,

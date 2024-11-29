@@ -86,7 +86,7 @@ const LoginCover = () => {
 
                     console.log('Navigating to the appropriate page based on role:', roleId);
                     if (roleId === 1) {
-                        navigate('/', { state: { isAuthenticated } });
+                        navigate('/Dashboard', { state: { isAuthenticated } });
                     } else if (roleId === 2) {
                         navigate('/users/user-table', { state: { isAuthenticated } });
                     }
